@@ -20,5 +20,3 @@ utiliser vim:
     echap // revient au mode normal
     :wq //a faire en mode normal: write && quit: sauvegarde et ferme le fichier
     :u // comme ctrl-z
-
-test

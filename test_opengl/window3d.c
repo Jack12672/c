@@ -2,7 +2,6 @@
 /* Rotation d'un solide 3D en OpenGL        */
 /* Utilise GLUT (Open GL Utility Toolkit)   */
 /* Réalisé par Jean-Christophe MICHEL       */
-/* Février 2011                             */
 /* www.gecif.net                            */
 /********************************************/
 
