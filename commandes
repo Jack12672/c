@@ -1,0 +1,22 @@
+make: compiler normal
+
+make debug: compiler pour debuger
+
+utiliser le debuger:
+    make debug
+    gdb ./test
+    fs n
+    start (liste_des_arguments) // demarre le programme avec les arguments si il y en a
+    run // lance le programme et l'execute jusqu'a la fin ou jusqu'a ce que ca plante
+    n // next: passe a la ligne suivante sans rentrer dans les sous fonctions
+    s //step: rentre dans la sous fonction
+    b (numero ligne || nom de la fonction) // defini un breakpoint
+    c // continue: execute jusqu'au breakpoint suivant
+    q // quit: ferme gdb
+
+utiliser vim:
+    vim (nom_du_fichier) // ouvre le fichier avec vim
+    i // insert: passe en mode insertion pour ecrire
+    echap // revient au mode normal
+    :wq //a faire en mode normal: write && quit: sauvegarde et ferme le fichier
+    :u // comme ctrl-z
