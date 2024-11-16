@@ -3,6 +3,7 @@
 // gcc main.c -o opengl -lGL -lGLU -lglut
 
 
+// test modif
 
 /********************************************************************************************************/
 /* La fonction dessiner sera appelée chaque fois que GLUT détermine que la fenêtre doit être actualisée */
