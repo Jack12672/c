@@ -91,30 +91,37 @@ void dessiner(void)
     glPushMatrix();
 
     // glColor3f(1,0,0);
-    // glRotated(lx,1,0,0); /* lx est l'angle de rotation en degré */
-    // glRotated(ly,0,1,0); /* ly est l'angle de rotation en degré */
+    glRotated(lx,1,0,0); /* lx est l'angle de rotation en degré */
+    glRotated(ly,0,1,0); /* ly est l'angle de rotation en degré */
     glRotated(angle,1,0.9,0.8);
     // glRotated((angle+50),1,1,0);
 
     // glTranslated(0,0,0);
 
+
+    glFrontFace(GL_CCW - GL_CW);
+    glEnable(GL_CULL_FACE); 
+    glCullFace(GL_FRONT - GL_BACK - GL_FRONT_AND_BACK);
+    
+    
+    
     glColor3f(0,1,0);
     glutSolidCube(.5);
-    glColor3f(1,0,0);
+    glColor3f(1,1,0);
     glutWireCube(.2);
 
     glTranslated(0.8,0,0);
 
     // glColor3f(0,0,1);
     // glutSolidCube(.5);
-    glColor3f(0,1,0);
+    glColor3f(1,1,1);
     glutWireCube(.2);
 
     glTranslated(0,0.2,0);
 
     // glColor3f(0,0,1);
     // glutSolidCube(.5);
-    glColor3f(0,0,1);
+    glColor3f(0,1,1);
     glutWireCube(.2);
 
 

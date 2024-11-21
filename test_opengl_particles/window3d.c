@@ -1,7 +1,12 @@
 // gcc window3d.c -o w3d -lGL -lGLU -lglut
 
-
+#include <stdio.h>
+#include <stdlib.h>
 #include <GL/glut.h>
+#include <time.h>
+#include "window3d.h"
+
+
 
 typedef int BOOL;
 #define TRUE 1
@@ -14,12 +19,14 @@ static GLfloat ly=0;
 static int xclick=0;
 static int yclick=0;
 static int frame=0;
-static int time=0;
+static int temps=0;
 static int timebase=0;
 static GLfloat s=0;
 static int width=1000;
 static int height=1000;
 static float size=0.1;
+
+struct particle particles[5];
 
 /***************************************************************************************************/
 /* La fonction traiter_souris sera appelée chaque fois que GLUT détecte un évènement sur la souris */
@@ -70,28 +77,39 @@ void mouvement_souris(int x, int y)
 
 }
 
+
+
+
 /********************************************************************************************************/
 /* La fonction dessiner sera appelée chaque fois que GLUT détermine que la fenêtre doit être actualisée */
 /********************************************************************************************************/
 
 void dessiner(void)
 {
-
+    srand( time( NULL ) );
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(0, 0, 0,     0, 1, 1,     1, 1, 0);
     glClear (GL_COLOR_BUFFER_BIT);
     glPushMatrix();
-    glRotated(angle,1,1,1);
+    // glRotated(angle,1,1,1);
+    // glRotated(lx,1,0,0);    
+    // glRotated(ly,0,1,0);
 
     int division=20;
 
-    glColor3f(0,1,0);
-    glutSolidSphere(size,division,division);
-    glColor3f(1,0,0);
-    glutWireSphere(size,division,division);
 
-    // glTranslated(0.8,0,0);
+    for (int i=0; i<5;i++)
+    {
+        float xx= particles[i].x;
+        float yy= particles[i].y;
+
+        glTranslated(xx,yy,0);
+        glColor3f(0,0,1);
+        glutSolidSphere(size,division,division);   
+        glColor3f(1,0,0);
+        glutWireSphere(size,division,division);
+    }
 
     glPopMatrix();
     glEnd();
@@ -110,16 +128,16 @@ void animer (void)
 
     if (b_rotation)
     {
-    // angle+=1;
+    angle+=1;
     if (angle>360.00f){
     angle = 0.0;}
 
 
     frame++;
-    time=glutGet(GLUT_ELAPSED_TIME);
-    if (time - timebase > 1000) {
-    s=(frame*1000.0/(time-timebase));
-    timebase = time;
+    temps=glutGet(GLUT_ELAPSED_TIME);
+    if (temps - timebase > 1000) {
+    s=(frame*1000.0/(temps-timebase));
+    timebase = temps;
     frame = 0;
     }
     glutPostRedisplay();
@@ -133,6 +151,16 @@ void animer (void)
 
 int main(int argc, char** argv)
 {
+        
+    for (int i=0; i<5;i++)
+    {
+        float xx= (rand()%200-100)/100.0;
+        float yy= (rand()%200-100)/100.0;
+        printf("%f     %f\n", xx,yy);
+        particles[i].x=xx;
+        particles[i].y=yy;
+        particles[i].z=0;
+    }
 
     glutInit(&argc, argv);
     glutInitDisplayMode ( GLUT_RGB | GLUT_DOUBLE);
