@@ -86,55 +86,63 @@ void dessiner(void)
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(0, 0, 0, 0, 0, -1, 0, 1, 0);
+    gluLookAt(0, 0, 0,     0, 1, 0,     1, 1, 0);
     glClear (GL_COLOR_BUFFER_BIT);
     glPushMatrix();
 
-    glColor3f(0,0,1);
-    glRotated(lx,1,0,0); /* lx est l'angle de rotation en degré */
-    glRotated(ly,0,1,0); /* ly est l'angle de rotation en degré */
-    glRotated(angle,0,0,1);
-    glRotated((angle+5),1,1,0);
+    // glColor3f(1,0,0);
+    // glRotated(lx,1,0,0); /* lx est l'angle de rotation en degré */
+    // glRotated(ly,0,1,0); /* ly est l'angle de rotation en degré */
+    glRotated(angle,1,0.9,0.8);
+    // glRotated((angle+50),1,1,0);
 
-    glTranslated(0,0,0);
+    // glTranslated(0,0,0);
 
-    glColor3f(0,0,1);
-    glutSolidCube(.5);
     glColor3f(0,1,0);
-    glutWireCube(.5);
-
-    glTranslated(.5,0,0);
-
-    glColor3f(0,0,1);
     glutSolidCube(.5);
+    glColor3f(1,0,0);
+    glutWireCube(.2);
+
+    glTranslated(0.8,0,0);
+
+    // glColor3f(0,0,1);
+    // glutSolidCube(.5);
     glColor3f(0,1,0);
-    glutWireCube(.5);
+    glutWireCube(.2);
 
-    glTranslated(-1,0,0);
+    glTranslated(0,0.2,0);
 
+    // glColor3f(0,0,1);
+    // glutSolidCube(.5);
     glColor3f(0,0,1);
-    glutSolidCube(.5);
-    glColor3f(0,1,0);
-    glutWireCube(.5);
+    glutWireCube(.2);
 
-    glTranslated(.5,.5,0);
 
-    glColor3f(0,0,1);
-    glutSolidCube(.5);
-    glColor3f(0,1,0);
-    glutWireCube(.5);
+    glBegin(GL_POLYGON);
+        glVertex3f(0,0,0);
+        glVertex3f(-0.5,0,0.5);
+        glVertex3f(0,0.5,0);
+        glVertex3f(0.5,0,-0.5);
+    glEnd();
+ 
+    // glTranslated(.5,.5,0);
 
-    glTranslated(0,-.5,.5);
+    // glColor3f(0,0,1);
+    // glutSolidCube(.5);
+    // glColor3f(0,1,0);
+    // glutWireCube(.5);
 
-    glColor3f(0,0,1);
-    glutSolidCube(.5);
-    glColor3f(0,1,0);
-    glutWireCube(.5);
+    // glTranslated(0,-.5,.5);
 
-    glPopMatrix();
-    glPushMatrix();
-    glColor3f(1,1,1);
-    glTranslated(0,0,0);
+    // glColor3f(0,0,1);
+    // glutSolidCube(.5);
+    // glColor3f(0,1,0);
+    // glutWireCube(.5);
+
+    // glPopMatrix();
+    // glPushMatrix();
+    // glColor3f(1,1,1);
+    // glTranslated(0,0,0);
 
     glPopMatrix();
     glEnd();
@@ -178,8 +186,8 @@ int main(int argc, char** argv)
 {
 
     glutInit(&argc, argv);
-    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB | GLUT_DOUBLE);
-    glutInitWindowSize (400, 400);
+    glutInitDisplayMode ( GLUT_RGB | GLUT_DOUBLE);
+    glutInitWindowSize (600, 600);
     glutInitWindowPosition (100, 100);
     glutCreateWindow ("Objet 3D avec GLUT !");
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
