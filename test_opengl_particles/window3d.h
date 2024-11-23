@@ -15,9 +15,9 @@ struct position
 
 struct particle
 {
-    int x;
-    int y;
-    int z;
+    float x;
+    float y;
+    float z;
     float vx;
     float vy;
     float vz;

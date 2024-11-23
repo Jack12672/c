@@ -60,7 +60,7 @@ void drawElephant()
     glTranslatef(0,-20,-105);
     glColor3f(1.0,0.23,0.27);
     // glScalef(0.1,0.1,0.1);
-    float a = 1.5;
+    float a = 3.8;
     glScalef(a,a,a);
 
     glRotatef(elephantrot,0,-1,0);

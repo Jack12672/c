@@ -26,7 +26,7 @@ static int width=1000;
 static int height=1000;
 static float size=0.1;
 
-struct particle particles[5];
+struct particle *particles[5];
 
 /***************************************************************************************************/
 /* La fonction traiter_souris sera appelée chaque fois que GLUT détecte un évènement sur la souris */
@@ -84,12 +84,12 @@ void mouvement_souris(int x, int y)
 /* La fonction dessiner sera appelée chaque fois que GLUT détermine que la fenêtre doit être actualisée */
 /********************************************************************************************************/
 
-void dessiner(void)
+void dessiner()
 {
     srand( time( NULL ) );
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(0, 0, 0,     0, 1, 1,     1, 1, 0);
+    gluLookAt(1, 0, 0,     0, 0, 0,     0, 1, 0);
     glClear (GL_COLOR_BUFFER_BIT);
     glPushMatrix();
     // glRotated(angle,1,1,1);
@@ -99,17 +99,19 @@ void dessiner(void)
     int division=20;
 
 
-    for (int i=0; i<5;i++)
-    {
-        float xx= particles[i].x;
-        float yy= particles[i].y;
+    // for (int i=0; i<1;i++)
+    // {
+        float xx= particles[0]->x;
+        float yy= particles[0]->y;
+        printf("%f     %f\n", xx,yy);
+        glTranslated(-0.15,-0.02,0);
+                // glTranslated(xx,yy,0);
 
-        glTranslated(xx,yy,0);
         glColor3f(0,0,1);
         glutSolidSphere(size,division,division);   
         glColor3f(1,0,0);
         glutWireSphere(size,division,division);
-    }
+    // }
 
     glPopMatrix();
     glEnd();
@@ -145,22 +147,30 @@ void animer (void)
 
 }
 
-/*************************************************************************************************/
-/*                           P R O G R A M M E              P R I N C I P A L                    */
-/*************************************************************************************************/
 
 int main(int argc, char** argv)
 {
         
-    for (int i=0; i<5;i++)
-    {
-        float xx= (rand()%200-100)/100.0;
-        float yy= (rand()%200-100)/100.0;
-        printf("%f     %f\n", xx,yy);
-        particles[i].x=xx;
-        particles[i].y=yy;
-        particles[i].z=0;
-    }
+    // for (int i=0; i<5;i++)
+    // {
+    //     float xx= (rand()%200-100)/100.0;
+    //     float yy= (rand()%200-100)/100.0;
+
+    //     particles[i].x=xx;
+    //     particles[i].y=yy;
+    //     particles[i].z=0;
+    // }
+
+
+
+    particles[0] = malloc (sizeof (struct particle));
+    particles[0]->x=0.5;
+    particles[0]->y=0;
+    particles[0]->z=0;
+
+
+
+
 
     glutInit(&argc, argv);
     glutInitDisplayMode ( GLUT_RGB | GLUT_DOUBLE);
@@ -168,11 +178,15 @@ int main(int argc, char** argv)
     glutInitWindowPosition (100, 10);
     glutCreateWindow ("Particles interactions Nov 2024");
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glutDisplayFunc(dessiner);
+    for (int i=0; i<1; i++)
+    {
+        glutDisplayFunc(dessiner);
+    }
+
     glutMouseFunc (traiter_souris);
     glutMotionFunc (mouvement_souris);
-    glutIdleFunc (animer); /* définit la fonction qui sera exécutée en arrière plan */
+    glutIdleFunc (animer);
     glutMainLoop();
-    return 0; /* la norme C ANSI exige que la fonction main retourne un entier */
+    return 0;
 
 }
