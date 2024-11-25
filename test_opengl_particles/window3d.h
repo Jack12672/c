@@ -5,8 +5,9 @@
 #include <stdlib.h>
 #include <GL/glut.h>
 #include <time.h>
-#include "window3d.h"
 
+#define NB_PARTICLES 5000
+#define SIZE_PARTICLES 0.02
 
 struct position
 {
