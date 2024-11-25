@@ -1,192 +1,142 @@
 // gcc window3d.c -o w3d -lGL -lGLU -lglut
 
+#include "window3d.h"
+#include <GL/glut.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <GL/glut.h>
 #include <time.h>
-#include "window3d.h"
 
-
-
-typedef int BOOL;
-#define TRUE 1
-#define FALSE 0
-
-static GLfloat angle = 0.0;
-static BOOL Button1Down = FALSE, b_rotation=TRUE;
-static GLfloat lx=0;
-static GLfloat ly=0;
-static int xclick=0;
-static int yclick=0;
-static int frame=0;
-static int temps=0;
-static int timebase=0;
-static GLfloat s=0;
-static int width=1000;
-static int height=1000;
-static float size=0.1;
+static int year = 0, day = 0;
+static int start = 1;
 
 struct particle *particles[5];
 
-/***************************************************************************************************/
-/* La fonction traiter_souris sera appelée chaque fois que GLUT détecte un évènement sur la souris */
-/***************************************************************************************************/
-
-void traiter_souris(int bouton, int etat, int x, int y)
-{
-
-    if (bouton == GLUT_LEFT_BUTTON)
-    {
-    Button1Down = (etat == GLUT_DOWN) ? TRUE : FALSE;
-    xclick = x;
-    yclick = y;
-
-    }
-    if (bouton == GLUT_RIGHT_BUTTON)
-    {
-    if (etat==GLUT_DOWN)
-    {
-    if (b_rotation) { b_rotation=FALSE; }
-    else { b_rotation=TRUE; }
-    }
-
-    }
-
+void intit_particles(void) {
+  for (int i = 0; i < 5; i++) {
+    float xx = (rand() % 200 - 100) / 100.0;
+    float yy = (rand() % 200 - 100) / 100.0;
+    particles[i] = malloc (sizeof (struct particle));
+    particles[i]->x = xx;
+    particles[i]->y = yy;
+    particles[i]->z = 0;
+  }
 }
 
-
-void mouvement_souris(int x, int y)
-{
-
-    if (Button1Down)
-    {
-    if (x>xclick){
-                  ly=ly+(xclick-x)*.5;
-                  xclick=x;}
-    if (x<xclick){
-                  ly=ly+(xclick-x)*.5;
-                  xclick=x;}
-    if (y>yclick){
-                  lx=lx+(yclick-y)*.5;
-                  yclick=y;}
-    if (y<yclick){
-                  lx=lx+(yclick-y)*.5;
-                  yclick=y;}
-    glutPostRedisplay();
-    }
-
+void init(void) {
+  glClearColor(0.0, 0.0, 0.0, 0.0);
+  glShadeModel(GL_FLAT);
 }
 
+void display(void) {
+  /*
+                     +y     -z (Into the Screen, our eyes' direction)
+                     |     /
+                     |    /
+                     |   /
+                     |  /
+                     | /
+                     +----------------> +x
+                /
+               /
+              /
+        +z (Out of Screen)
 
 
+     Plane Equation: A ⋅ 𝑥 + B ⋅ 𝑦 + C ⋅ 𝑧 + D = 0
 
-/********************************************************************************************************/
-/* La fonction dessiner sera appelée chaque fois que GLUT détermine que la fenêtre doit être actualisée */
-/********************************************************************************************************/
+ */
 
-void dessiner()
-{
-    srand( time( NULL ) );
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(1, 0, 0,     0, 0, 0,     0, 1, 0);
-    glClear (GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glColor3f(1.0, 1.0, 1.0);
+
+  glPushMatrix();
+  {
     glPushMatrix();
-    // glRotated(angle,1,1,1);
-    // glRotated(lx,1,0,0);    
-    // glRotated(ly,0,1,0);
+    {
 
-    int division=20;
-
-
-    // for (int i=0; i<1;i++)
-    // {
-        float xx= particles[0]->x;
-        float yy= particles[0]->y;
-        printf("%f     %f\n", xx,yy);
-        glTranslated(-0.15,-0.02,0);
-                // glTranslated(xx,yy,0);
-
-        glColor3f(0,0,1);
-        glutSolidSphere(size,division,division);   
-        glColor3f(1,0,0);
-        glutWireSphere(size,division,division);
-    // }
-
+      // rotation on its axis or north pole (y-axis)
+      glRotatef(-day, 0.0, 1.0, 0.0);
+      glRotatef(year, 0.1, 1.0, 0.01);
+      // 90 degree rotation w.r.t x-axis
+      glRotatef(90, 1.0, 0.0, 0.0);
+      glColor3f(0.5, 1.0, 0);
+      glutWireSphere(1.6, 40, 30); // earth
+    }
     glPopMatrix();
-    glEnd();
 
-    glFlush();
-    glutSwapBuffers();
+    glRotatef((GLfloat)day, 0.0, 1.0, 0.0); // revolution around earth
+    glRotatef(year, 0.1, 1.0, 0.01);
+    glTranslatef(3.5, 0.0, 0.0);
 
+    glRotatef(90, 1.0, 0.0, 0.0);
+    glColor3f(0.5, 0, 1);
+    glutWireSphere(0.2, 16, 16); // our moon
+  }
+  glPopMatrix();
+
+  glutSwapBuffers();
 }
 
-/********************************************************************************************************/
-/* La fonction animer sera appelée dès que le programme est en attende (aucun évènement détecté)        */
-/********************************************************************************************************/
+void reshape(int w, int h) {
+  glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 1.0, 20.0);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  gluLookAt(0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+}
 
-void animer (void)
-{
-
-    if (b_rotation)
-    {
-    angle+=1;
-    if (angle>360.00f){
-    angle = 0.0;}
-
-
-    frame++;
-    temps=glutGet(GLUT_ELAPSED_TIME);
-    if (temps - timebase > 1000) {
-    s=(frame*1000.0/(temps-timebase));
-    timebase = temps;
-    frame = 0;
-    }
+void keyboard(unsigned char key, int x, int y) {
+  switch (key) {
+  case 'd':
+    day = (day + 1) % 360;
     glutPostRedisplay();
-    }
+    break;
+  case 'D':
+    day = (day - 1) % 360;
+    glutPostRedisplay();
+    break;
+  case 'y':
+    year = (year + 5) % 100000;
+    glutPostRedisplay();
+    break;
+  case 'Y':
+    year = (year - 5) % 100000;
+    glutPostRedisplay();
+    break;
+  default:
 
+    break;
+  }
 }
 
+int main(int argc, char **argv) {
+  if (start == 1) {
+    start = 2;
+    intit_particles();
+  }
 
-int main(int argc, char** argv)
-{
-        
-    // for (int i=0; i<5;i++)
-    // {
-    //     float xx= (rand()%200-100)/100.0;
-    //     float yy= (rand()%200-100)/100.0;
+  glutInit(&argc, argv);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+  glutInitWindowSize(1600, 900);
+  glutInitWindowPosition(100, 100);
+  glutCreateWindow(argv[0]);
+  init();
+  glutDisplayFunc(display);
+  glutReshapeFunc(reshape);
+  glutKeyboardFunc(keyboard);
 
-    //     particles[i].x=xx;
-    //     particles[i].y=yy;
-    //     particles[i].z=0;
-    // }
+  if (start == 2) {
+    start = 0;
 
-
-
-    particles[0] = malloc (sizeof (struct particle));
-    particles[0]->x=0.5;
-    particles[0]->y=0;
-    particles[0]->z=0;
-
-
-
-
-
-    glutInit(&argc, argv);
-    glutInitDisplayMode ( GLUT_RGB | GLUT_DOUBLE);
-    glutInitWindowSize (width,height);
-    glutInitWindowPosition (100, 10);
-    glutCreateWindow ("Particles interactions Nov 2024");
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    for (int i=0; i<1; i++)
-    {
-        glutDisplayFunc(dessiner);
+    for (int i = 0; i < 5; i++) {
+      float xx = particles[i]->x;
+      float yy = particles[i]->y;
+      printf("%i      %f     %f\n", i, xx, yy);
     }
+  }
 
-    glutMouseFunc (traiter_souris);
-    glutMotionFunc (mouvement_souris);
-    glutIdleFunc (animer);
-    glutMainLoop();
-    return 0;
-
+  glutMainLoop();
+  return 0;
 }
