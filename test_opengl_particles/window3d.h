@@ -6,13 +6,15 @@
 #include <GL/glut.h>
 #include <time.h>
 
-#define NB_PARTICLES 5000
-#define SIZE_PARTICLES 0.02
+#define NB_PARTICLES 200
+#define SIZE_PARTICLES 0.05
+#define W 40 
+#define H 22
 
-struct position
-{
-    int pos[5];
-};
+// H et W définit pour affichage sur la totalité de l'écran l'écran avec:
+// gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 0.0, 20.0);
+// gluLookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+// soit x+/-20 et y+/-11
 
 struct particle
 {
@@ -23,6 +25,15 @@ struct particle
     float vy;
     float vz;
 };
+
+
+
+void intit_particles(void);
+void init(void);
+void gravity (void);
+void display(void);
+void reshape(int w, int h);
+void keyboard(unsigned char key, int x, int y);
 
 
 #endif
