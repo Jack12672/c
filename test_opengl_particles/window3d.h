@@ -6,10 +6,11 @@
 #include <GL/glut.h>
 #include <time.h>
 
-#define NB_PARTICLES 200
+#define NB_PARTICLES 2000
 #define SIZE_PARTICLES 0.05
 #define W 40 
 #define H 22
+#define AREA H/3
 
 // H et W définit pour affichage sur la totalité de l'écran l'écran avec:
 // gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 0.0, 20.0);
@@ -34,6 +35,7 @@ void gravity (void);
 void display(void);
 void reshape(int w, int h);
 void keyboard(unsigned char key, int x, int y);
+void write(int x, int y, char *string, void *font);
 
 
 #endif
