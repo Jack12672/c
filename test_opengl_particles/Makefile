@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-Wall
 SRC=window3d.c # mettre ici tous les fichier .c a executer
 OBJ = ${SRC:.c=.o}
-LDLIBS=-lGL -lGLU -lglut
+LDLIBS=-lGL -lGLU -lglut -lm
 
 all: test
 

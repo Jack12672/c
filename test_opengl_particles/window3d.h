@@ -6,11 +6,15 @@
 #include <GL/glut.h>
 #include <time.h>
 
-#define NB_PARTICLES 2000
-#define SIZE_PARTICLES 0.05
+#define NB_PARTICLES 1
+#define SIZE_PARTICLES 0.2
 #define W 40 
 #define H 22
 #define AREA H/3
+#define G 9.81
+#define PI 3.14159
+#define UPDATE_TIME 0.1
+
 
 // H et W définit pour affichage sur la totalité de l'écran l'écran avec:
 // gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 0.0, 20.0);
@@ -22,9 +26,10 @@ struct particle
     float x;
     float y;
     float z;
-    float vx;
-    float vy;
-    float vz;
+    float v0;
+    float alphax;
+    float alphay;
+    float alphaz;
 };
 
 

@@ -1,4 +1,4 @@
-// gcc window3d.c -o w3d -lGL -lGLU -lglut
+// gcc window3d.c -o w3d -lGL -lGLU -lglut -lm
 
 #include "window3d.h"
 #include <GL/glut.h>
@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h> 
+#include <math.h>
 
 static int start = 1;
 static int xclick = 0;
@@ -16,7 +17,9 @@ static int leftclick = 0;
 static int rightclick=0;
 static float cameraAngle =0;
 static float totalRotation=0;
-
+static float temp1=0;
+static float temp2=0;
+static float temp3=0;
 
 struct particle *particles[NB_PARTICLES];
 
@@ -31,6 +34,11 @@ void intit_particles(void) {
     particles[i]->x = xx;
     particles[i]->y = yy;
     particles[i]->z = zz;
+    particles[i]->v0 = 0.5;
+    particles[i]->alphax = PI/4;
+    particles[i]->alphay = 0;
+    particles[i]->alphaz = 0;
+
   }
 }
 
@@ -41,9 +49,20 @@ void init(void) {
 
 void gravity(void) {
   for (int i = 0; i < NB_PARTICLES; i++) {
-    particles[i]->y -= (float)H / 1000;
-    if (particles[i]->y < -AREA)
-      particles[i]->y = AREA;
+    float x=particles[i]->v0*cos(particles[i]->alphax)*UPDATE_TIME; //1=1seconde
+    float y=-G/2*pow(UPDATE_TIME,2)+particles[i]->v0*sin(particles[i]->alphax)*UPDATE_TIME;  //1=1seconde
+    float hauteur= particles[i]->y*100+H*100/2.3;
+    y+=hauteur/100;
+    temp1=particles[i]->y;
+    temp2=y;
+    temp3=hauteur;
+    particles[i]->y-=0.01;
+    // particles[i]->y+=y;    
+    
+    temp1=particles[i]->y;
+    // particles[i]->y += y;
+    // if (particles[i]->y < -AREA)
+    //   particles[i]->y = AREA;
     }
     glutPostRedisplay();
 
@@ -57,13 +76,22 @@ void display(void) {
   glPushMatrix();
   {
     glColor3d(1,1,1);
-    float i = cameraAngle;
-    char str[10];
-    sprintf(str, "%f", i);
+    char str[80];
+    char str1[30];
+    char str2[30];
+    sprintf(str, "%f", temp1);
+    strcat (str, " = temp1 | ");    
+    sprintf(str1, "%f", temp2);
+    strcat (str, str1);
+    strcat (str, " = temp2 | ");
+    sprintf(str2, "%f", temp3);
+    strcat (str, str2);
+    strcat (str, " = temp3");
+
     write(-W/3,H/2,str,GLUT_BITMAP_9_BY_15);   
 
     glBegin(GL_QUADS);
-    glColor4f(  0.2,  0.0,  0.0 , 0.5);
+    glColor4f(  0.1,  0.0,  0.0 , 0.5);
     glVertex3f(-AREA, -AREA, -AREA);
     glVertex3f( AREA, -AREA, -AREA);
     glVertex3f( AREA,  AREA, -AREA);
@@ -71,7 +99,7 @@ void display(void) {
     glEnd();
 
     glBegin(GL_QUADS);
-    glColor4f(  0.2,  0.0,  0.0 , 0.5);
+    glColor4f(  0.1,  0.0,  0.0 , 0.5);
     glVertex3f(-AREA, -AREA,  AREA);
     glVertex3f( AREA, -AREA,  AREA);
     glVertex3f( AREA,  AREA,  AREA);
@@ -80,7 +108,7 @@ void display(void) {
 
 
     glBegin(GL_QUADS);
-    glColor4f(  0.0,  0.2,  0.0, 0.5);
+    glColor4f(  0.0,  0.1,  0.0, 0.5);
     glVertex3f(-AREA, -AREA, -AREA);
     glVertex3f(-AREA,  AREA, -AREA);
     glVertex3f(-AREA,  AREA,  AREA);
@@ -88,7 +116,7 @@ void display(void) {
     glEnd();
 
     glBegin(GL_QUADS);
-    glColor4f(  0.0,  0.2,  0.0, 0.5);
+    glColor4f(  0.0,  0.1,  0.0, 0.5);
     glVertex3f( AREA, -AREA, -AREA);
     glVertex3f( AREA,  AREA, -AREA);
     glVertex3f( AREA,  AREA,  AREA);
@@ -97,7 +125,7 @@ void display(void) {
 
 
     glBegin(GL_QUADS);
-    glColor4f(  0.0,  0.0,  0.2, 0.5);
+    glColor4f(  0.0,  0.0,  0.1, 0.5);
     glVertex3f(-AREA, -AREA, -AREA);
     glVertex3f( AREA, -AREA, -AREA);
     glVertex3f( AREA, -AREA,  AREA);
@@ -105,7 +133,7 @@ void display(void) {
     glEnd();
 
     glBegin(GL_QUADS);
-    glColor4f(  0.0,  0.0,  0.2, 0.5);
+    glColor4f(  0.0,  0.0,  0.1, 0.5);
     glVertex3f(-AREA,  AREA, -AREA);
     glVertex3f( AREA,  AREA, -AREA);
     glVertex3f( AREA,  AREA,  AREA);
