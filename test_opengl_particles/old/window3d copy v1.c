@@ -29,30 +29,29 @@ void intit_particles(void) {
   srand(time(NULL));
   float p = 1000;
   for (int i = 0; i < NB_PARTICLES; i++) {
+    // float xx = ((rand() % (int)p - p / 2)) * 1.8*AREA / p;
+    // float yy = ((rand() % (int)p - p / 2)) * 1.8*AREA / p;
+    // float zz = ((rand() % (int)p - p / 2)) * 1.8*AREA / p;
     float xx = ((rand() % (int)p )) * H / p;
     float yy = ((rand() % (int)p )) * H / p;
     float zz = ((rand() % (int)p )) * H / p;
-    float vx = ((rand() % (int)p )) * EXCITATION / p - EXCITATION / (2*p);
-    float vy = ((rand() % (int)p )) * EXCITATION / (5*p);
-    float vz = ((rand() % (int)p )) * EXCITATION / p - EXCITATION / (2*p);
+    if (i==0)
+    {
+      printf("%f     %f     %f",xx,yy,zz);
+      xx=10;
+      yy=80;
+      zz=100;
+
+    }
     particles[i] = malloc(sizeof(struct particle));
     particles[i]->x = xx;
     particles[i]->y = yy;
     particles[i]->z = zz;
-    particles[i]->vx = vx;
-    particles[i]->vy = vy;
-    particles[i]->vz = vz;
-    if (i==0)    
-    {
-      // printf("%f     %f     %f",xx,yy,zz);
-    particles[i]->x = 10;
-    particles[i]->y = 80;
-    particles[i]->z = 100;
-    particles[i]->vx = 10;
-    particles[i]->vy = 2;
-    particles[i]->vz = 3;
-
-    }
+    particles[i]->v0 = 1.5;
+    particles[i]->time = UPDATE_TIME;
+    particles[i]->alphax = PI/4;
+    particles[i]->alphay = 0;
+    particles[i]->alphaz = 0;
 
   }
 }
@@ -64,54 +63,30 @@ void init(void) {
 
 void gravity(void) {
   for (int i = 0; i < NB_PARTICLES; i++) {
-    // float alphaXY= atanf(particles[i]->vx/ particles[i]->vy);
-    // float alphaXZ= atanf(particles[i]->vz/ particles[i]->vy);
-    
-    particles[i]->x+=particles[i]->vx*UPDATE_TIME;
-    particles[i]->z+=particles[i]->vz*UPDATE_TIME;
+    float x=particles[i]->v0*cos(particles[i]->alphax)*particles[i]->time;
+    float y=-G/2*pow(particles[i]->time,2)+particles[i]->v0*sin(particles[i]->alphax)*particles[i]->time;
+    float speed=sqrtf(pow(x,2)+pow(y,2))/UPDATE_TIME;
+    // if (speed>20)
+    // {
+    //   x/=2;
+    //   y/=2;
+    // }
 
-    particles[i]->y+=-G/2*pow(UPDATE_TIME,2)+particles[i]->vy;
-    particles[i]->vy-=G/2*pow(UPDATE_TIME,2);
-    // temp1=particles[i]->x;
-    // temp2=particles[i]->y;
-    // temp3=particles[i]->z;
-
-
+    particles[i]->time+=UPDATE_TIME;
+    particles[i]->x+=x;
+    particles[i]->y+=y;
+    temp1=speed;
+    temp2=y;
+    temp3=particles[i]->y;
     if (particles[i]->y <0)
     {
-      particles[i]->y=0;
-      particles[i]->vy=-particles[i]->vy*FLOOR; //rebond
-      particles[i]->vx+=-particles[i]->vx*(1-FLOOR); // frottements
-      particles[i]->vz+=-particles[i]->vz*(1-FLOOR); // frottements
-    }
-    if (particles[i]->y>H)
-    {
-      particles[i]->y=H;
-      particles[i]->vy=-particles[i]->vy*WALL;
-    }
-    if (particles[i]->x<0)
-    {
-      particles[i]->x=0;
-      particles[i]->vx=-particles[i]->vx*WALL;
-    }
-    if (particles[i]->x>H)
-    {
-      particles[i]->x=H;
-      particles[i]->vx=-particles[i]->vx*WALL;
+      particles[i]->time=UPDATE_TIME;
+      particles[i]->alphax=PI/2;
+      particles[i]->v0/=3;
     }
 
-    if (particles[i]->z<0)
-    {
-      particles[i]->z=0;
-      particles[i]->vz=-particles[i]->vz*WALL;
     }
-    if (particles[i]->z>H)
-    {
-      particles[i]->z=H;
-      particles[i]->vz=-particles[i]->vz*WALL;
-    }
-  }
-  glutPostRedisplay();
+    glutPostRedisplay();
 
 }
 
@@ -130,6 +105,7 @@ void stopRotationY (void)
   totalRotationY=0;
   glutPostRedisplay();
 }
+
 
 void display(void) {
   glClear(GL_COLOR_BUFFER_BIT);
@@ -314,33 +290,17 @@ void mousemotion(int x, int y) {
   if (leftclick == 1) {
     float xshift = 0;
     float yshift = 0;
-    // if (x < xclick)
-    //   xshift = -0.03;
-    // else if (x > xclick)
-    //   xshift = 0.03;
-    // if (y < yclick)
-    //   yshift = +0.03;
-    // else if (y > yclick)
-    //   yshift = -0.1;
-
-    xshift=(x-xclick)/100;
-    yshift=(y-yclick)/100;
-
-    temp1=x;
-    temp2=y;
-    temp3=xclick;
+    if (x < xclick)
+      xshift = -0.03;
+    else if (x > xclick)
+      xshift = 0.03;
+    if (y < yclick)
+      yshift = +0.1;
+    else if (y > yclick)
+      yshift = -0.03;
     for (int i = 0; i < NB_PARTICLES; i++) {
-      if (particles[i]->y==0)
-      {
-
-        particles[i]->x += xshift;
-        particles[i]->y += yshift;  
-        particles[i]->y += (xshift+yshift)/2;    
-        particles[i]->vx += xshift;
-        particles[i]->vy += yshift;
-        particles[i]->vy += (xshift+yshift)/2;  
-      }
-      
+      particles[i]->x += xshift;
+      particles[i]->y += yshift;
       glutPostRedisplay();
     }
   }

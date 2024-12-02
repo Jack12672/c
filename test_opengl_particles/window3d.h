@@ -6,14 +6,18 @@
 #include <GL/glut.h>
 #include <time.h>
 
-#define NB_PARTICLES 1
+#define NB_PARTICLES 10
 #define SIZE_PARTICLES 0.35
 #define W 120 
 #define H 100
 #define AREA H/3
 #define G 9.81
 #define PI 3.14159
-#define UPDATE_TIME 0.01
+#define UPDATE_TIME 0.1
+#define WALL 0.95   // rebonds
+#define FLOOR 0.8   // rebonds
+#define EXCITATION 5 // vitesse max  
+
 
 
 // H et W définit pour affichage sur la totalité de l'écran l'écran avec:
@@ -26,11 +30,9 @@ struct particle
     float x;
     float y;
     float z;
-    float v0;
-    float time;
-    float alphax;
-    float alphay;
-    float alphaz;
+    float vx;
+    float vy;
+    float vz;
 };
 
 
