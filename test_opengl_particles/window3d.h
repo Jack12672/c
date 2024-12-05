@@ -6,7 +6,7 @@
 #include <GL/glut.h>
 #include <time.h>
 
-#define NB_PARTICLES 10
+#define NB_PARTICLES 2
 #define SIZE_PARTICLES 0.35
 #define W 120 
 #define H 100
@@ -14,8 +14,8 @@
 #define G 9.81
 #define PI 3.14159
 #define UPDATE_TIME 0.1
-#define WALL 0.95   // rebonds
-#define FLOOR 0.8   // rebonds
+#define WALL 1 //0.95   // rebonds
+#define FLOOR 1 //0.8   // rebonds
 #define EXCITATION 5 // vitesse max  
 
 
@@ -33,6 +33,7 @@ struct particle
     float vx;
     float vy;
     float vz;
+    int att1;
 };
 
 
