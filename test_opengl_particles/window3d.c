@@ -22,7 +22,12 @@ static float totalRotationY = 0;
 static float temp1 = 0;
 static float temp2 = 0;
 static float temp3 = 0;
-static float Forces[11] = {4,     0.33,  0,     -0.96, -0.73, -0.45,
+static float temp4 = 0;
+static char txt1[5];
+static char txt2[5];
+static char txt3[5];
+static char txt4[5];
+static float Forces[11] = {4,     0.33,  0.01,     -0.96, -0.73, -0.45,
                            -0.27, -0.13, -0.06, -0.02, -0.01};
 
 struct particle *particles[NB_PARTICLES];
@@ -59,8 +64,8 @@ void intit_particles(void) {
       particles[i]->x = 20;
       particles[i]->y = 55;
       particles[i]->z = 100;
-      particles[i]->vx = 1;
-      particles[i]->vy = 0;
+      particles[i]->vx = 0;
+      particles[i]->vy = 3;
       particles[i]->vz = 0;
       particles[i]->att1 = 0;
     }
@@ -120,21 +125,40 @@ float checkAttraction(float a, float b) {
   else
     direction = 1;
 
-  float att = (b - a) / H * 11;
-  direction *= Forces[(int)att];
+  float att = (int) (b - a);
   temp1 = att;
+  sprintf(txt1, "%s", "dist");
+
+  if (att >10) att=Forces[10];
+  else att=Forces[abs(att)];
+
+
+
+
+
   temp2 = direction;
-  temp3 = particles[0]->vx;
+  sprintf(txt2, "%s", "dir");
+
+
+  temp3 = att;
+  sprintf(txt3, "%s", "att");
+
+  direction *= att;
+
+  temp4 = direction;
+  sprintf(txt4, "%s", "dir");
 
   return direction / 10;
 }
 
 void attraction(void) {
   for (int i = 0; i < NB_PARTICLES; i++) {
-    float att =
+    
+    if (i==0)
+    {float att =
         checkAttraction(particles[i]->x, particles[particles[i]->att1]->x);
 
-    particles[i]->vx += att;
+    particles[i]->vx += att;}
     // if (i==0){
     // temp1=att;
     // particles[i]->vx+=2;
@@ -148,7 +172,7 @@ void attraction(void) {
     //   att = 1;
     // else
     //   att=-1;
-    // particles[i]->y+=(particles[i]->vy+att)*UPDATE_TIME;
+    particles[i]->y+=(particles[i]->vy)*UPDATE_TIME;
 
     // att=0;
     // if (checkAttraction (particles[i]->z,
@@ -187,22 +211,34 @@ void display(void) {
   glRotated(cameraAngleY, 1, 0, 0);
   glPushMatrix();
   {
-    // temp1=cameraAngleY;
-    // temp2=totalRotationY;
-    // temp3=totalRotationX;
-
     glColor3f(1, 1, 1);
-    char str[80];
+    char str[130];
     char str1[30];
     char str2[30];
-    sprintf(str, "%f", temp1);
-    strcat(str, " = temp1 | ");
-    sprintf(str1, "%f", temp2);
+    char str3[30];
+    char str4[30];
+
+    sprintf(str, "%s", txt1);
+    strcat(str, ": ");
+    sprintf(str1, "%f", temp1);
     strcat(str, str1);
-    strcat(str, " = temp2 | ");
-    sprintf(str2, "%f", temp3);
+    strcat(str, " | ");
+    strcat(str, txt2);
+    strcat(str, ": ");
+    sprintf(str2, "%f", temp2);
     strcat(str, str2);
-    strcat(str, " = temp3");
+    strcat(str, " | ");
+    strcat(str, txt3);
+    strcat(str, ": ");
+    sprintf(str3, "%f", temp3);
+    strcat(str, str3);
+    strcat(str, " | ");
+    strcat(str, txt4);
+    strcat(str, ": ");
+    sprintf(str4, "%f", temp4);
+    strcat(str, str4);
+
+
     write(-W / 3, H / 2, str, GLUT_BITMAP_9_BY_15);
 
     glBegin(GL_QUADS);
@@ -323,7 +359,20 @@ void keyboard(unsigned char key, int x, int y) {
       // totalRotationY+=cameraAngleY;
       glutPostRedisplay();
     }
+  break;
+  case 'a':
+    particles[1]->x+=1;
+    glutPostRedisplay();
     break;
+  case 'q':
+    particles[1]->x-=1;
+    glutPostRedisplay();
+    break;
+  case 'w':
+    particles[0]->vx = 0;
+    glutPostRedisplay();
+    break;
+
 
   default:
     break;
@@ -412,3 +461,4 @@ int main(int argc, char **argv) {
   glutMainLoop();
   return 0;
 }
+
