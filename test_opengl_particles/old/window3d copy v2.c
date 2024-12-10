@@ -28,10 +28,10 @@ static char txt1[5];
 static char txt2[5];
 static char txt3[5];
 static char txt4[5];
-static float maximum_force = 0;
+static float maximum_force=0;
 
 static float Forces[12] = { 4,     0.33,  0.01,  -0.96, -0.73, -0.45,
-                            -0.27, -0.13, -0.06, -0.02, -0.01, 0 };
+                            -0.27, -0.13, -0.06, -0.02, -0.01 , 0};
 
 struct particle *particles[NB_PARTICLES];
 
@@ -144,16 +144,15 @@ float checkAttraction(float a, float b)
         direction = 1;
 
     int dist = abs((int)(b - a));
-    float att = 0;
+    float att=0;
 
     if (dist > 11)
         att = Forces[11];
     else
         att = Forces[abs(dist)];
 
-    if (att > maximum_force)
-        maximum_force = att;
-    direction *= att * UPDATE_TIME;
+    if (att>maximum_force) maximum_force=att;
+    direction *= att*UPDATE_TIME;
 
     return direction;
 }
@@ -162,31 +161,32 @@ void attraction(void)
 {
     for (int i = 0; i < NB_PARTICLES; i++)
     {
-        if (i < 100)
+        if (i <100)
         {
             float att = checkAttraction(particles[i]->x,
                                         particles[particles[i]->att1]->x);
 
-            if (abs(particles[i]->vx) < SIZE_PARTICLES)
+            if (abs(particles[i]->vx)<SIZE_PARTICLES)  
             {
                 particles[i]->vx += att;
                 particles[i]->x += particles[i]->vx * UPDATE_TIME;
-            }
-            if (particles[i]->vx < -SIZE_PARTICLES)
-                particles[i]->vx = -SIZE_PARTICLES;
-            if (particles[i]->vx > SIZE_PARTICLES)
-                particles[i]->vx = SIZE_PARTICLES;
+            }  
+            if (particles[i]->vx<-SIZE_PARTICLES) particles[i]->vx = -SIZE_PARTICLES;
+            if (particles[i]->vx>SIZE_PARTICLES) particles[i]->vx = SIZE_PARTICLES;
 
-            temp1 = particles[i]->vx;
-            sprintf(txt1, "%s", "vx");
-            temp2 = particles[i]->x;
-            sprintf(txt2, "%s", "x");
-            temp3 = att;
-            sprintf(txt3, "%s", "att");
-            temp4 = maximum_force;
-            sprintf(txt4, "%s", "maxF");
+
+
+                temp1 = particles[i]->vx;
+                sprintf(txt1, "%s", "vx");    
+                temp2 = particles[i]->x;
+                sprintf(txt2, "%s", "x");
+                temp3 = att;
+                sprintf(txt3, "%s", "att");
+                temp4 = maximum_force;
+                sprintf(txt4, "%s", "maxF");
         }
         bounce(i);
+        
     }
     glutPostRedisplay();
 }
