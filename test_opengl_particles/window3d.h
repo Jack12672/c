@@ -31,6 +31,7 @@ struct particle {
   float vy;
   float vz;
   int att1;
+  int att;
 };
 
 void intit_particles(void);

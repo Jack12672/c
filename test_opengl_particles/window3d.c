@@ -54,6 +54,7 @@ void intit_particles(void)
         particles[i]->vx = vx;
         particles[i]->vy = vy;
         particles[i]->vz = vz;
+        particles[i]->att = 1;
         if (i == 0)
         {
             // printf("%f     %f     %f",xx,yy,zz);
@@ -135,6 +136,67 @@ void gravity(void)
     glutPostRedisplay();
 }
 
+void attraction1(int a, int b)
+{
+    float *xa;
+    float *xb;
+    float *vxa;
+    float *vxb;
+
+    for (int i = 0; i < 2; i++)
+    {
+        if (i == 0) // x
+        {
+            xa = &particles[a]->x;
+            xb = &particles[b]->x;
+            vxa = &particles[a]->vx;
+            vxb = &particles[b]->vx;
+        }
+        else if (i == 1) // y
+        {
+            xa = &particles[a]->y;
+            xb = &particles[b]->y;
+            vxa = &particles[a]->vy;
+            vxb = &particles[b]->vy;
+        }
+
+        float direction = 0;
+        if (*xa <= *xb)
+            direction = -1;
+        else
+            direction = 1;
+
+        float att = 0;
+        int dist = abs((int)(*xb - *xa));
+        if (dist > 11)
+            att = Forces[11];
+        else
+            att = Forces[abs(dist)];
+
+        direction *= att * UPDATE_TIME;
+
+        if (abs(*vxa) < SIZE_PARTICLES)
+        {
+            *vxa += direction;
+            *xa += *vxa * UPDATE_TIME;
+        }
+        if (*vxa < -SIZE_PARTICLES)
+            *vxa = -SIZE_PARTICLES;
+        if (*vxa > SIZE_PARTICLES)
+            *vxa = SIZE_PARTICLES;
+
+        if (abs(*vxb) < SIZE_PARTICLES)
+        {
+            *vxb += -direction;
+            *xb += *vxb * UPDATE_TIME;
+        }
+        if (*vxb < -SIZE_PARTICLES)
+            *vxb = -SIZE_PARTICLES;
+        if (*vxb > SIZE_PARTICLES)
+            *vxb = SIZE_PARTICLES;
+    }
+}
+
 float checkAttraction(float a, float b)
 {
     float direction = 0;
@@ -160,34 +222,37 @@ float checkAttraction(float a, float b)
 
 void attraction(void)
 {
-    for (int i = 0; i < NB_PARTICLES; i++)
-    {
-        if (i < 100)
-        {
-            float att = checkAttraction(particles[i]->x,
-                                        particles[particles[i]->att1]->x);
+    // for (int i = 0; i < NB_PARTICLES; i++)
+    // {
+    //     if (i < 100)
+    //     {
+    //         float att = checkAttraction(particles[i]->x,
+    //                                     particles[particles[i]->att1]->x);
 
-            if (abs(particles[i]->vx) < SIZE_PARTICLES)
-            {
-                particles[i]->vx += att;
-                particles[i]->x += particles[i]->vx * UPDATE_TIME;
-            }
-            if (particles[i]->vx < -SIZE_PARTICLES)
-                particles[i]->vx = -SIZE_PARTICLES;
-            if (particles[i]->vx > SIZE_PARTICLES)
-                particles[i]->vx = SIZE_PARTICLES;
+    //         if (abs(particles[i]->vx) < SIZE_PARTICLES)
+    //         {
+    //             particles[i]->vx += att;
+    //             particles[i]->x += particles[i]->vx * UPDATE_TIME;
+    //         }
+    //         if (particles[i]->vx < -SIZE_PARTICLES)
+    //             particles[i]->vx = -SIZE_PARTICLES;
+    //         if (particles[i]->vx > SIZE_PARTICLES)
+    //             particles[i]->vx = SIZE_PARTICLES;
 
-            temp1 = particles[i]->vx;
-            sprintf(txt1, "%s", "vx");
-            temp2 = particles[i]->x;
-            sprintf(txt2, "%s", "x");
-            temp3 = att;
-            sprintf(txt3, "%s", "att");
-            temp4 = maximum_force;
-            sprintf(txt4, "%s", "maxF");
-        }
-        bounce(i);
-    }
+    //         temp1 = particles[i]->vx;
+    //         sprintf(txt1, "%s", "vx");
+    //         temp2 = particles[i]->x;
+    //         sprintf(txt2, "%s", "x");
+    //         temp3 = att;
+    //         sprintf(txt3, "%s", "att");
+    //         temp4 = maximum_force;
+    //         sprintf(txt4, "%s", "maxF");
+    //     }
+
+    attraction1(0, 1);
+    bounce(0);
+
+    bounce(1);
     glutPostRedisplay();
 }
 
