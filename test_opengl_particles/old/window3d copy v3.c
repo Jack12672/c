@@ -58,22 +58,22 @@ void intit_particles(void)
         if (i == 0)
         {
             // printf("%f     %f     %f",xx,yy,zz);
-            particles[i]->x = 0;
-            particles[i]->y = 0;
+            particles[i]->x = 40;
+            particles[i]->y = 50;
             particles[i]->z = 100;
             particles[i]->vx = 0;
-            particles[i]->vy = 1;
+            particles[i]->vy = 0;
             particles[i]->vz = 0;
             particles[i]->att1 = 1;
         }
         if (i == 1)
         {
             // printf("%f     %f     %f",xx,yy,zz);
-            particles[i]->x = 50;
-            particles[i]->y = 100;
+            particles[i]->x = 20;
+            particles[i]->y = 55;
             particles[i]->z = 100;
             particles[i]->vx = 0;
-            particles[i]->vy = -1;
+            particles[i]->vy = 3;
             particles[i]->vz = 0;
             particles[i]->att1 = 0;
         }
@@ -138,71 +138,63 @@ void gravity(void)
 
 void attraction1(int a, int b)
 {
-    float *xa = &particles[a]->x;
-    float *xb = &particles[b]->x;
-    float *vxa = &particles[a]->vx;
-    float *vxb = &particles[b]->vx;
+    float *xa;
+    float *xb;
+    float *vxa;
+    float *vxb;
 
-    float *ya = &particles[a]->y;
-    float *yb = &particles[b]->y;
-    float *vya = &particles[a]->vy;
-    float *vyb = &particles[b]->vy;
-
-    float *za = &particles[a]->z;
-    float *zb = &particles[b]->z;
-    float *vza = &particles[a]->vz;
-    float *vzb = &particles[b]->vz;
-
-    float distance = sqrtf(powf((*xa - *xb), 2) + powf((*ya - *yb), 2)
-                           + powf((*za - *zb), 2));
-
-    if (distance < 20)
+    for (int i = 0; i < 2; i++)
     {
-        float nx = (*xa - *xb) / fabs(*xa - *xb);
-        float vxnomal = (*vxa - *vxb) * powf(nx, 2);
-        *vxa -= vxnomal;
-        *vxb += vxnomal;
+        if (i == 0) // x
+        {
+            xa = &particles[a]->x;
+            xb = &particles[b]->x;
+            vxa = &particles[a]->vx;
+            vxb = &particles[b]->vx;
+        }
+        else if (i == 1) // y
+        {
+            xa = &particles[a]->y;
+            xb = &particles[b]->y;
+            vxa = &particles[a]->vy;
+            vxb = &particles[b]->vy;
+        }
 
-        float ny = (*ya - *yb) / fabs(*ya - *yb);
-        float vynomal = (*vya - *vyb) * powf(ny, 2);
-        *vya -= vynomal;
-        *vyb += vynomal;
+        float direction = 0;
+        if (*xa <= *xb)
+            direction = -1;
+        else
+            direction = 1;
 
-        float nz = (*za - *zb) / fabs(*za - *zb);
-        float vznomal = (*vza - *vzb) * powf(nz, 2);
-        *vza -= vznomal;
-        *vzb += vznomal;
+        float att = 0;
+        int dist = abs((int)(*xb - *xa));
+        if (dist > 11)
+            att = Forces[11];
+        else
+            att = Forces[abs(dist)];
+
+        direction *= att * UPDATE_TIME;
+
+        if (abs(*vxa) < SIZE_PARTICLES)
+        {
+            *vxa += direction;
+            *xa += *vxa * UPDATE_TIME;
+        }
+        if (*vxa < -SIZE_PARTICLES)
+            *vxa = -SIZE_PARTICLES;
+        if (*vxa > SIZE_PARTICLES)
+            *vxa = SIZE_PARTICLES;
+
+        if (abs(*vxb) < SIZE_PARTICLES)
+        {
+            *vxb += -direction;
+            *xb += *vxb * UPDATE_TIME;
+        }
+        if (*vxb < -SIZE_PARTICLES)
+            *vxb = -SIZE_PARTICLES;
+        if (*vxb > SIZE_PARTICLES)
+            *vxb = SIZE_PARTICLES;
     }
-
-    *xa += *vxa * UPDATE_TIME;
-    *xb += *vxb * UPDATE_TIME;
-
-    *ya += *vya * UPDATE_TIME;
-    *yb += *vyb * UPDATE_TIME;
-
-    *za += *vza * UPDATE_TIME;
-    *zb += *vzb * UPDATE_TIME;
-
-    temp1 = *xa;
-    sprintf(txt1, "%s", "xa");
-    temp2 = *ya;
-    sprintf(txt2, "%s", "ya");
-    temp3 = *xb;
-    sprintf(txt3, "%s", "xb");
-    temp4 = *yb;
-    sprintf(txt4, "%s", "yb");
-
-    // if (*vxa < -SIZE_PARTICLES)
-    //     *vxa = -SIZE_PARTICLES;
-    // if (*vxa > SIZE_PARTICLES)
-    //     *vxa = SIZE_PARTICLES;
-
-    // if (abs(*vxb) < SIZE_PARTICLES)
-
-    // if (*vxb < -SIZE_PARTICLES)
-    //     *vxb = -SIZE_PARTICLES;
-    // if (*vxb > SIZE_PARTICLES)
-    //     *vxb = SIZE_PARTICLES;
 }
 
 float checkAttraction(float a, float b)
@@ -230,8 +222,36 @@ float checkAttraction(float a, float b)
 
 void attraction(void)
 {
+    // for (int i = 0; i < NB_PARTICLES; i++)
+    // {
+    //     if (i < 100)
+    //     {
+    //         float att = checkAttraction(particles[i]->x,
+    //                                     particles[particles[i]->att1]->x);
+
+    //         if (abs(particles[i]->vx) < SIZE_PARTICLES)
+    //         {
+    //             particles[i]->vx += att;
+    //             particles[i]->x += particles[i]->vx * UPDATE_TIME;
+    //         }
+    //         if (particles[i]->vx < -SIZE_PARTICLES)
+    //             particles[i]->vx = -SIZE_PARTICLES;
+    //         if (particles[i]->vx > SIZE_PARTICLES)
+    //             particles[i]->vx = SIZE_PARTICLES;
+
+    //         temp1 = particles[i]->vx;
+    //         sprintf(txt1, "%s", "vx");
+    //         temp2 = particles[i]->x;
+    //         sprintf(txt2, "%s", "x");
+    //         temp3 = att;
+    //         sprintf(txt3, "%s", "att");
+    //         temp4 = maximum_force;
+    //         sprintf(txt4, "%s", "maxF");
+    //     }
+
     attraction1(0, 1);
     bounce(0);
+
     bounce(1);
     glutPostRedisplay();
 }
@@ -534,20 +554,3 @@ int main(int argc, char **argv)
     glutMainLoop();
     return 0;
 }
-
-// int dist=(int)distance;
-// if (dist > 11)
-//         att = Forces[11]*UPDATE_TIME;
-//     else
-//         att = Forces(dist]*UPDATE_TIME;
-
-//     float att = 0;
-//     int dist = abs((int)(*xb - *xa));
-//     if (dist > 11)
-//         att = Forces[11];
-//     else
-//         att = Forces[abs(dist)];
-
-//     direction *= att * UPDATE_TIME;
-
-// *vxa += direction;

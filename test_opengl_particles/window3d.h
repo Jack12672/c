@@ -14,8 +14,8 @@
 #define G 9.81
 #define PI 3.14159
 #define UPDATE_TIME 1
-#define WALL 0.95     // 0.95   // rebonds
-#define FLOOR 0.8     // 0.8   // rebonds
+#define WALL 1    // 0.95   // rebonds
+#define FLOOR 1    // 0.8   // rebonds
 #define EXCITATION 5 // vitesse max
 
 // H et W définit pour affichage sur la totalité de l'écran l'écran avec:
