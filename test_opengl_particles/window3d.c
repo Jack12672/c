@@ -58,11 +58,11 @@ void intit_particles(void)
         if (i == 0)
         {
             // printf("%f     %f     %f",xx,yy,zz);
-            particles[i]->x = 0;
+            particles[i]->x = 40;
             particles[i]->y = 0;
             particles[i]->z = 100;
-            particles[i]->vx = 0;
-            particles[i]->vy = 1;
+            particles[i]->vx = 1;
+            particles[i]->vy = 0.5;
             particles[i]->vz = 0;
             particles[i]->att1 = 1;
         }
@@ -72,8 +72,8 @@ void intit_particles(void)
             particles[i]->x = 50;
             particles[i]->y = 100;
             particles[i]->z = 100;
-            particles[i]->vx = 0;
-            particles[i]->vy = -1;
+            particles[i]->vx = -1;
+            particles[i]->vy = 1;
             particles[i]->vz = 0;
             particles[i]->att1 = 0;
         }
@@ -88,37 +88,37 @@ void init(void)
 
 void bounce(int i)
 {
-    if (particles[i]->y < 0)
+    if (particles[i]->y < SIZE_PARTICLES)
     {
-        particles[i]->y = 0;
+        particles[i]->y = SIZE_PARTICLES;
         particles[i]->vy = -particles[i]->vy * FLOOR; // bounces
         particles[i]->vx += -particles[i]->vx * (1 - FLOOR); // frictions
         particles[i]->vz += -particles[i]->vz * (1 - FLOOR); // frictions
     }
-    if (particles[i]->y > H)
+    if (particles[i]->y > H-SIZE_PARTICLES)
     {
-        particles[i]->y = H;
+        particles[i]->y = H-SIZE_PARTICLES;
         particles[i]->vy = -particles[i]->vy * WALL;
     }
-    if (particles[i]->x < 0)
+    if (particles[i]->x < SIZE_PARTICLES)
     {
-        particles[i]->x = 0;
+        particles[i]->x = SIZE_PARTICLES;
         particles[i]->vx = -particles[i]->vx * WALL;
     }
-    if (particles[i]->x > H)
+    if (particles[i]->x > H-SIZE_PARTICLES)
     {
-        particles[i]->x = H;
+        particles[i]->x = H-SIZE_PARTICLES;
         particles[i]->vx = -particles[i]->vx * WALL;
     }
 
-    if (particles[i]->z < 0)
+    if (particles[i]->z < SIZE_PARTICLES)
     {
-        particles[i]->z = 0;
+        particles[i]->z = SIZE_PARTICLES;
         particles[i]->vz = -particles[i]->vz * WALL;
     }
-    if (particles[i]->z > H)
+    if (particles[i]->z > H-SIZE_PARTICLES)
     {
-        particles[i]->z = H;
+        particles[i]->z = H-SIZE_PARTICLES;
         particles[i]->vz = -particles[i]->vz * WALL;
     }
 }
@@ -141,34 +141,43 @@ void attraction1(int a, int b)
     float *xa = &particles[a]->x;
     float *xb = &particles[b]->x;
     float *vxa = &particles[a]->vx;
+    float vmax=*vxa;
     float *vxb = &particles[b]->vx;
+    if (*vxb>vmax) vmax=*vxb;
 
     float *ya = &particles[a]->y;
     float *yb = &particles[b]->y;
     float *vya = &particles[a]->vy;
+    if (*vya>vmax) vmax=*vya;
     float *vyb = &particles[b]->vy;
+    if (*vyb>vmax) vmax=*vyb;
 
     float *za = &particles[a]->z;
     float *zb = &particles[b]->z;
     float *vza = &particles[a]->vz;
+    if (*vza>vmax) vmax=*vza;
     float *vzb = &particles[b]->vz;
+    if (*vzb>vmax) vmax=*vzb;
 
     float distance = sqrtf(powf((*xa - *xb), 2) + powf((*ya - *yb), 2)
                            + powf((*za - *zb), 2));
 
-    if (distance < 20)
+    if (distance < SIZE_PARTICLES*2*vmax)
     {
-        float nx = (*xa - *xb) / fabs(*xa - *xb);
+        float nx=0;
+        if (*xa != *xb)  nx = (*xa - *xb) / fabs(*xa - *xb);
         float vxnomal = (*vxa - *vxb) * powf(nx, 2);
         *vxa -= vxnomal;
         *vxb += vxnomal;
 
-        float ny = (*ya - *yb) / fabs(*ya - *yb);
+        float ny = 0;
+        if (*ya != *yb) ny=(*ya - *yb) / fabs(*ya - *yb);
         float vynomal = (*vya - *vyb) * powf(ny, 2);
         *vya -= vynomal;
         *vyb += vynomal;
 
-        float nz = (*za - *zb) / fabs(*za - *zb);
+        float nz = 0;
+        if ( *za !=*zb) nz = (*za - *zb) / fabs(*za - *zb);
         float vznomal = (*vza - *vzb) * powf(nz, 2);
         *vza -= vznomal;
         *vzb += vznomal;
@@ -192,17 +201,6 @@ void attraction1(int a, int b)
     temp4 = *yb;
     sprintf(txt4, "%s", "yb");
 
-    // if (*vxa < -SIZE_PARTICLES)
-    //     *vxa = -SIZE_PARTICLES;
-    // if (*vxa > SIZE_PARTICLES)
-    //     *vxa = SIZE_PARTICLES;
-
-    // if (abs(*vxb) < SIZE_PARTICLES)
-
-    // if (*vxb < -SIZE_PARTICLES)
-    //     *vxb = -SIZE_PARTICLES;
-    // if (*vxb > SIZE_PARTICLES)
-    //     *vxb = SIZE_PARTICLES;
 }
 
 float checkAttraction(float a, float b)
@@ -292,52 +290,30 @@ void display(void)
 
         write(-W / 3, H / 2, str, GLUT_BITMAP_9_BY_15);
 
-        glBegin(GL_QUADS);
-        glColor4f(0.1, 0.0, 0.0, 0.5);
-        glVertex3f(-AREA, -AREA, -AREA);
-        glVertex3f(AREA, -AREA, -AREA);
-        glVertex3f(AREA, AREA, -AREA);
-        glVertex3f(-AREA, AREA, -AREA);
-        glEnd();
-
-        glBegin(GL_QUADS);
-        glColor4f(0.1, 0.0, 0.0, 0.5);
+        glBegin(GL_LINE_STRIP);
+        glColor4f(1, 0.0, 0.0, 1);
         glVertex3f(-AREA, -AREA, AREA);
         glVertex3f(AREA, -AREA, AREA);
-        glVertex3f(AREA, AREA, AREA);
-        glVertex3f(-AREA, AREA, AREA);
-        glEnd();
-
-        glBegin(GL_QUADS);
-        glColor4f(0.0, 0.1, 0.0, 0.5);
+        glVertex3f(AREA, -AREA, -AREA);
         glVertex3f(-AREA, -AREA, -AREA);
+        glVertex3f(-AREA, -AREA, AREA);
+        glVertex3f(-AREA, AREA, AREA);
+        glVertex3f(AREA, AREA, AREA);
+        glVertex3f(AREA, AREA, -AREA);
         glVertex3f(-AREA, AREA, -AREA);
         glVertex3f(-AREA, AREA, AREA);
-        glVertex3f(-AREA, -AREA, AREA);
         glEnd();
-
-        glBegin(GL_QUADS);
-        glColor4f(0.0, 0.1, 0.0, 0.5);
+        glBegin(GL_LINES);
+        glVertex3f(AREA, -AREA, AREA);
+        glVertex3f(AREA, AREA, AREA);
+        glEnd();
+        glBegin(GL_LINES);
         glVertex3f(AREA, -AREA, -AREA);
         glVertex3f(AREA, AREA, -AREA);
-        glVertex3f(AREA, AREA, AREA);
-        glVertex3f(AREA, -AREA, AREA);
         glEnd();
-
-        glBegin(GL_QUADS);
-        glColor4f(0.0, 0.0, 0.1, 0.5);
+        glBegin(GL_LINES);
         glVertex3f(-AREA, -AREA, -AREA);
-        glVertex3f(AREA, -AREA, -AREA);
-        glVertex3f(AREA, -AREA, AREA);
-        glVertex3f(-AREA, -AREA, AREA);
-        glEnd();
-
-        glBegin(GL_QUADS);
-        glColor4f(0.0, 0.0, 0.1, 0.5);
         glVertex3f(-AREA, AREA, -AREA);
-        glVertex3f(AREA, AREA, -AREA);
-        glVertex3f(AREA, AREA, AREA);
-        glVertex3f(-AREA, AREA, AREA);
         glEnd();
 
         for (int i = 0; i < NB_PARTICLES; i++)
@@ -360,14 +336,16 @@ void display(void)
             }
             glPopMatrix();
         }
-        glColor3f(0, 0, 0.5);
-        glTranslatef(-20, 8, 0);
+        glColor3f(0, 0, 1);
+        glTranslatef(-AREA*1.45, 0 , AREA);
         glRotatef(90, 1.0, 0.0, 0.0);
-        glutWireSphere(3, 20, 20);
+        glutWireSphere(10, 20, 20);
         glFlush();
     }
     glPopMatrix();
+    
     glutSwapBuffers();
+
 }
 
 void reshape(int w, int h)
@@ -422,11 +400,11 @@ void keyboard(unsigned char key, int x, int y)
         }
         break;
     case 'a':
-        particles[1]->x += 1;
+        particles[1]->vx += 0.2;
         glutPostRedisplay();
         break;
     case 'q':
-        particles[1]->x -= 1;
+        particles[1]->vx -= 0.2;
         glutPostRedisplay();
         break;
     case 'w':

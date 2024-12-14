@@ -7,10 +7,10 @@
 #include <time.h>
 
 #define NB_PARTICLES  2
-#define SIZE_PARTICLES 0.35
+#define SIZE_PARTICLES 2
 #define W 120
 #define H 100
-#define AREA H / 3
+#define AREA H / 3 
 #define G 9.81
 #define PI 3.14159
 #define UPDATE_TIME 1
