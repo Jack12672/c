@@ -10,6 +10,8 @@
 #define SIZE_PARTICLES 2
 #define W 120
 #define H 100
+#define WINDOW_W 1600
+#define WINDOW_H 900
 #define AREA H / 3 
 #define G 9.81
 #define PI 3.14159
@@ -17,6 +19,7 @@
 #define WALL 1    // 0.95   // rebonds
 #define FLOOR 1    // 0.8   // rebonds
 #define EXCITATION 5 // vitesse max
+
 
 // H et W définit pour affichage sur la totalité de l'écran l'écran avec:
 // gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 0.0, 20.0);

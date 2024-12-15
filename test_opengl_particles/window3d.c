@@ -20,6 +20,8 @@ static float cameraAngleX = 0;
 static float cameraAngleY = 0;
 static float totalRotationX = 0;
 static float totalRotationY = 0;
+static float pointOfView = 0;
+
 static float temp1 = 0;
 static float temp2 = 0;
 static float temp3 = 0;
@@ -57,24 +59,22 @@ void intit_particles(void)
         particles[i]->att = 1;
         if (i == 0)
         {
-            // printf("%f     %f     %f",xx,yy,zz);
-            particles[i]->x = 40;
-            particles[i]->y = 0;
+            particles[i]->x = 10;
+            particles[i]->y = 53;
             particles[i]->z = 100;
             particles[i]->vx = 1;
-            particles[i]->vy = 0.5;
-            particles[i]->vz = 0;
+            particles[i]->vy = 0.2;
+            particles[i]->vz = -1;
             particles[i]->att1 = 1;
         }
         if (i == 1)
         {
-            // printf("%f     %f     %f",xx,yy,zz);
-            particles[i]->x = 50;
-            particles[i]->y = 100;
-            particles[i]->z = 100;
+            particles[i]->x = 90;
+            particles[i]->y = 50;
+            particles[i]->z = 50;
             particles[i]->vx = -1;
-            particles[i]->vy = 1;
-            particles[i]->vz = 0;
+            particles[i]->vy = 0.5;
+            particles[i]->vz = -0.5;
             particles[i]->att1 = 0;
         }
     }
@@ -95,9 +95,9 @@ void bounce(int i)
         particles[i]->vx += -particles[i]->vx * (1 - FLOOR); // frictions
         particles[i]->vz += -particles[i]->vz * (1 - FLOOR); // frictions
     }
-    if (particles[i]->y > H-SIZE_PARTICLES)
+    if (particles[i]->y > H - SIZE_PARTICLES)
     {
-        particles[i]->y = H-SIZE_PARTICLES;
+        particles[i]->y = H - SIZE_PARTICLES;
         particles[i]->vy = -particles[i]->vy * WALL;
     }
     if (particles[i]->x < SIZE_PARTICLES)
@@ -105,9 +105,9 @@ void bounce(int i)
         particles[i]->x = SIZE_PARTICLES;
         particles[i]->vx = -particles[i]->vx * WALL;
     }
-    if (particles[i]->x > H-SIZE_PARTICLES)
+    if (particles[i]->x > H - SIZE_PARTICLES)
     {
-        particles[i]->x = H-SIZE_PARTICLES;
+        particles[i]->x = H - SIZE_PARTICLES;
         particles[i]->vx = -particles[i]->vx * WALL;
     }
 
@@ -116,9 +116,9 @@ void bounce(int i)
         particles[i]->z = SIZE_PARTICLES;
         particles[i]->vz = -particles[i]->vz * WALL;
     }
-    if (particles[i]->z > H-SIZE_PARTICLES)
+    if (particles[i]->z > H - SIZE_PARTICLES)
     {
-        particles[i]->z = H-SIZE_PARTICLES;
+        particles[i]->z = H - SIZE_PARTICLES;
         particles[i]->vz = -particles[i]->vz * WALL;
     }
 }
@@ -141,46 +141,89 @@ void attraction1(int a, int b)
     float *xa = &particles[a]->x;
     float *xb = &particles[b]->x;
     float *vxa = &particles[a]->vx;
-    float vmax=*vxa;
+    float vmax = *vxa;
     float *vxb = &particles[b]->vx;
-    if (*vxb>vmax) vmax=*vxb;
+    if (*vxb > vmax)
+        vmax = *vxb;
 
     float *ya = &particles[a]->y;
     float *yb = &particles[b]->y;
     float *vya = &particles[a]->vy;
-    if (*vya>vmax) vmax=*vya;
+    if (*vya > vmax)
+        vmax = *vya;
     float *vyb = &particles[b]->vy;
-    if (*vyb>vmax) vmax=*vyb;
+    if (*vyb > vmax)
+        vmax = *vyb;
 
     float *za = &particles[a]->z;
     float *zb = &particles[b]->z;
     float *vza = &particles[a]->vz;
-    if (*vza>vmax) vmax=*vza;
+    if (*vza > vmax)
+        vmax = *vza;
     float *vzb = &particles[b]->vz;
-    if (*vzb>vmax) vmax=*vzb;
+    if (*vzb > vmax)
+        vmax = *vzb;
 
     float distance = sqrtf(powf((*xa - *xb), 2) + powf((*ya - *yb), 2)
                            + powf((*za - *zb), 2));
 
-    if (distance < SIZE_PARTICLES*2*vmax)
+    if (distance < SIZE_PARTICLES * 2 * vmax)
     {
-        float nx=0;
-        if (*xa != *xb)  nx = (*xa - *xb) / fabs(*xa - *xb);
-        float vxnomal = (*vxa - *vxb) * powf(nx, 2);
-        *vxa -= vxnomal;
-        *vxb += vxnomal;
-
+        float nx = 0;
+        if (*xa != *xb)
+            nx = (*xa - *xb) / fabs(*xa - *xb);
         float ny = 0;
-        if (*ya != *yb) ny=(*ya - *yb) / fabs(*ya - *yb);
-        float vynomal = (*vya - *vyb) * powf(ny, 2);
-        *vya -= vynomal;
-        *vyb += vynomal;
-
+        if (*ya != *yb)
+            ny = (*ya - *yb) / fabs(*ya - *yb);
         float nz = 0;
-        if ( *za !=*zb) nz = (*za - *zb) / fabs(*za - *zb);
-        float vznomal = (*vza - *vzb) * powf(nz, 2);
-        *vza -= vznomal;
-        *vzb += vznomal;
+        if (*za != *zb)
+            nz = (*za - *zb) / fabs(*za - *zb);
+
+        float vxnormal = (*vxa - *vxb) * powf(nx, 2);
+        float vynormal = (*vya - *vyb) * powf(ny, 2);
+        float vznormal = (*vza - *vzb) * powf(nz, 2);
+        *vxa -= vxnormal;
+        *vxb += vxnormal;
+        *vya -= vynormal;
+        *vyb += vynormal;
+        *vza -= vznormal;
+        *vzb += vznormal;
+
+        // temp1 = vznormal;
+        // sprintf(txt1, "%s", "vzn");
+        // temp2 = vxnormal;
+        // sprintf(txt2, "%s", "vxn");
+        // temp3 = shift;
+        // sprintf(txt3, "%s", "sh<");
+        // temp4 = shift;
+        // sprintf(txt4, "%s", "sh>");
+
+        // if ((fabs(vxnormal)!=0) & (fabs(vynormal)==0))
+        // {
+        //     if (*ya<*yb)
+        //     {
+        //         *vya=-vxnormal/4;
+        //         *vyb=vxnormal/4;
+        //     }
+        //     if (*ya>*yb)
+        //     {
+        //         *vya=vxnormal/4;
+        //         *vyb=-vxnormal/4;
+        //     }
+        // }
+        // if ((fabs(vxnormal)!=0) & (fabs(vznormal)==0))
+        // {
+        //     if (*za<*zb)
+        //     {
+        //         *vza=-vxnormal/4;
+        //         *vzb=vxnormal/4;
+        //     }
+        //     if (*za>*zb)
+        //     {
+        //         *vza=vxnormal/4;
+        //         *vzb=-vxnormal/4;
+        //     }
+        // }
     }
 
     *xa += *vxa * UPDATE_TIME;
@@ -191,16 +234,6 @@ void attraction1(int a, int b)
 
     *za += *vza * UPDATE_TIME;
     *zb += *vzb * UPDATE_TIME;
-
-    temp1 = *xa;
-    sprintf(txt1, "%s", "xa");
-    temp2 = *ya;
-    sprintf(txt2, "%s", "ya");
-    temp3 = *xb;
-    sprintf(txt3, "%s", "xb");
-    temp4 = *yb;
-    sprintf(txt4, "%s", "yb");
-
 }
 
 float checkAttraction(float a, float b)
@@ -234,6 +267,15 @@ void attraction(void)
     glutPostRedisplay();
 }
 
+void stopRotation(void)
+{
+    cameraAngleX = 0;
+    cameraAngleY = 0;
+    totalRotationX = 0;
+    totalRotationY = 0;
+    reshape(WINDOW_W, WINDOW_H);
+}
+
 void stopRotationX(void)
 {
     glRotated(-totalRotationX, 0, 1, 0);
@@ -250,6 +292,14 @@ void stopRotationY(void)
     glutPostRedisplay();
 }
 
+void zoom(void)
+{
+    // printf("start2\n");
+    glLoadIdentity();
+    reshape(WINDOW_W, WINDOW_H);
+    glRotated(totalRotationY, 1, 0, 0);
+    glRotated(totalRotationX, 0, 1, 0);
+}
 void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -337,15 +387,23 @@ void display(void)
             glPopMatrix();
         }
         glColor3f(0, 0, 1);
-        glTranslatef(-AREA*1.45, 0 , AREA);
+        glTranslatef(-AREA * 1.45, 0, AREA);
         glRotatef(90, 1.0, 0.0, 0.0);
         glutWireSphere(10, 20, 20);
         glFlush();
     }
     glPopMatrix();
-    
+
     glutSwapBuffers();
 
+    temp1 = pointOfView;
+    sprintf(txt1, "%s", "pof");
+    temp2 = 0;
+    sprintf(txt2, "%s", "--");
+    temp3 = totalRotationX;
+    sprintf(txt3, "%s", "A x");
+    temp4 = totalRotationY;
+    sprintf(txt4, "%s", "A y");
 }
 
 void reshape(int w, int h)
@@ -356,7 +414,7 @@ void reshape(int w, int h)
     gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 0.0, H);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(0.0, 0.0, H, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    gluLookAt(0.0, 0.0, pointOfView, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
 void write(int x, int y, char *string, void *font)
@@ -372,30 +430,34 @@ void keyboard(unsigned char key, int x, int y)
     switch (key)
     {
     case ' ':
-        gravity();
-        glutPostRedisplay();
+        pointOfView = H;
+        stopRotation();
         break;
     case 'x': // stop rotation x
-        stopRotationX();
-        break;
-    case 'y': // stop rotation y
-        stopRotationY();
+        if (cameraAngleX - 0.05 > -5)
+        {
+            cameraAngleX -= 0.05;
+            glutPostRedisplay();
+        }
         break;
     case 'X':
-        stopRotationY();
-        if (cameraAngleX + 0.05 < 1)
+        if (cameraAngleX + 0.05 < 5)
         {
             cameraAngleX += 0.05;
-            // totalRotationX+=cameraAngleX;
+            glutPostRedisplay();
+        }
+        break;
+    case 'y': // stop rotation y
+        if (cameraAngleY - 0.05 > -5)
+        {
+            cameraAngleY -= 0.05;
             glutPostRedisplay();
         }
         break;
     case 'Y':
-        stopRotationX();
-        if (cameraAngleY + 0.05 < 1)
+        if (cameraAngleY + 0.05 < 5)
         {
             cameraAngleY += 0.05;
-            // totalRotationY+=cameraAngleY;
             glutPostRedisplay();
         }
         break;
@@ -425,11 +487,13 @@ void mouse(int bouton, int etat, int x, int y)
         yclick = y;
         leftclick = 1;
     }
-    else
+    else if (bouton == GLUT_LEFT_BUTTON && etat == GLUT_UP)
     {
         xclick = 0;
         yclick = 0;
         leftclick = 0;
+        cameraAngleX = 0;
+        cameraAngleY = 0;
     }
     if (bouton == GLUT_RIGHT_BUTTON && etat == GLUT_DOWN)
     {
@@ -451,39 +515,26 @@ void mousemotion(int x, int y)
     {
         float xshift = 0;
         float yshift = 0;
-        // if (x < xclick)
-        //   xshift = -0.03;
-        // else if (x > xclick)
-        //   xshift = 0.03;
-        // if (y < yclick)
-        //   yshift = +0.03;
-        // else if (y > yclick)
-        //   yshift = -0.1;
-
         xshift = (x - xclick) / 100;
         yshift = (y - yclick) / 100;
-
-        // temp1=x;
-        // temp2=y;
-        // temp3=xclick;
-        for (int i = 0; i < NB_PARTICLES; i++)
-        {
-            if (particles[i]->y == 0)
-            {
-                particles[i]->x += xshift;
-                particles[i]->y += yshift;
-                particles[i]->y += (xshift + yshift) / 2;
-                particles[i]->vx += xshift;
-                particles[i]->vy += yshift;
-                particles[i]->vy += (xshift + yshift) / 2;
-            }
-
-            glutPostRedisplay();
-        }
+        cameraAngleX = xshift;
+        cameraAngleY = yshift;
+        glutPostRedisplay();
     }
     if (rightclick == 1)
     {
-        glutPostRedisplay();
+        float yshift = 0;
+        if (y > yclickright)
+            yshift = 0.5;
+        if (y < yclickright)
+            yshift = -0.5;
+
+        pointOfView += yshift;
+        if (pointOfView < H / 2)
+            pointOfView = H / 2;
+        else if (pointOfView > H * 2)
+            pointOfView = H * 2;
+        zoom();
     }
 }
 
@@ -491,13 +542,14 @@ int main(int argc, char **argv)
 {
     if (start == 1)
     {
-        start = 2;
+        start = 0;
         intit_particles();
+        pointOfView = H;
     }
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutInitWindowSize(1600, 900);
+    glutInitWindowSize(WINDOW_W, WINDOW_H);
     glutInitWindowPosition(500, 20);
     glutCreateWindow(argv[1]);
     init();
@@ -508,7 +560,6 @@ int main(int argc, char **argv)
     glutMotionFunc(mousemotion);
     // glutIdleFunc(gravity);
     glutIdleFunc(attraction);
-
     glutMainLoop();
     return 0;
 }
