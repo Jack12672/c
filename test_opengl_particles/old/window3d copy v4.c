@@ -1,7 +1,7 @@
 // gcc window3d.c -o w3d -lGL -lGLU -lglut -lm
 
 #include "window3d.h"
-#include <threads.h>
+
 #include <GL/glut.h>
 #include <math.h>
 #include <stdio.h>
@@ -47,7 +47,7 @@ void intit_particles(void)
         float yy = ((rand() % (int)p)) * H / p;
         float zz = ((rand() % (int)p)) * H / p;
         float vx = ((rand() % (int)p)) * EXCITATION / p - EXCITATION / (2 * p);
-        float vy = ((rand() % (int)p)) * EXCITATION / p - EXCITATION / (2 * p);
+        float vy = ((rand() % (int)p)) * EXCITATION / (5 * p);
         float vz = ((rand() % (int)p)) * EXCITATION / p - EXCITATION / (2 * p);
         particles[i] = malloc(sizeof(struct particle));
         particles[i]->x = xx;
@@ -56,34 +56,27 @@ void intit_particles(void)
         particles[i]->vx = vx;
         particles[i]->vy = vy;
         particles[i]->vz = vz;
-        int pos=1;
-        for (int j=0; j<NB_PARTICLES;j++)
+        particles[i]->att = 1;
+        if (i == 0)
         {
-            if (j!=i) 
-            {
-                particles[i]->att[pos]=j;
-                pos+=1;
-            }
+            particles[i]->x = 10;
+            particles[i]->y = 53;
+            particles[i]->z = 100;
+            particles[i]->vx = 1;
+            particles[i]->vy = 0.2;
+            particles[i]->vz = -1;
+            particles[i]->att1 = 1;
         }
-        
-        // if (i == 0)
-        // {
-        //     particles[i]->x = 10;
-        //     particles[i]->y = 53;
-        //     particles[i]->z = 100;
-        //     particles[i]->vx = 1;
-        //     particles[i]->vy = 0.2;
-        //     particles[i]->vz = -1;
-        // }
-        // if (i == 1)
-        // {
-        //     particles[i]->x = 90;
-        //     particles[i]->y = 50;
-        //     particles[i]->z = 50;
-        //     particles[i]->vx = -1;
-        //     particles[i]->vy = 0.5;
-        //     particles[i]->vz = -0.5;
-        // }
+        if (i == 1)
+        {
+            particles[i]->x = 90;
+            particles[i]->y = 50;
+            particles[i]->z = 50;
+            particles[i]->vx = -1;
+            particles[i]->vy = 0.5;
+            particles[i]->vz = -0.5;
+            particles[i]->att1 = 0;
+        }
     }
 }
 
@@ -143,15 +136,6 @@ void gravity(void)
     glutPostRedisplay();
 }
 
-void gravity1(int part)
-    {
-        particles[part]->y += -G / 2 * pow(UPDATE_TIME, 2) + particles[part]->vy;
-        particles[part]->vy -= G / 2 * pow(UPDATE_TIME, 2);
-        if (particles[part]->vy >0.5) particles[part]->vy =0.5;
-        if (particles[part]->vy <-0.5) particles[part]->vy =-0.5;
-        bounce(part);
-    }
-
 void attraction1(int a, int b)
 {
     float *xa = &particles[a]->x;
@@ -205,10 +189,10 @@ void attraction1(int a, int b)
         *vza -= vznormal;
         *vzb += vznormal;
 
-        temp1 = a;
-        sprintf(txt1, "%s", "col");
-        temp2 = b;
-        sprintf(txt2, "%s", "col");
+        // temp1 = vznormal;
+        // sprintf(txt1, "%s", "vzn");
+        // temp2 = vxnormal;
+        // sprintf(txt2, "%s", "vxn");
         // temp3 = shift;
         // sprintf(txt3, "%s", "sh<");
         // temp4 = shift;
@@ -251,113 +235,6 @@ void attraction1(int a, int b)
     *za += *vza * UPDATE_TIME;
     *zb += *vzb * UPDATE_TIME;
 }
-
-
-int attraction2(void *arg)
-{
-    struct duo *d = (struct duo*) arg;
-    int a=d->a;
-    int b=d->b;
-    float *xa = &particles[a]->x;
-    float *xb = &particles[b]->x;
-    float *vxa = &particles[a]->vx;
-    float vmax = *vxa;
-    float *vxb = &particles[b]->vx;
-    if (*vxb > vmax)
-        vmax = *vxb;
-
-    float *ya = &particles[a]->y;
-    float *yb = &particles[b]->y;
-    float *vya = &particles[a]->vy;
-    if (*vya > vmax)
-        vmax = *vya;
-    float *vyb = &particles[b]->vy;
-    if (*vyb > vmax)
-        vmax = *vyb;
-
-    float *za = &particles[a]->z;
-    float *zb = &particles[b]->z;
-    float *vza = &particles[a]->vz;
-    if (*vza > vmax)
-        vmax = *vza;
-    float *vzb = &particles[b]->vz;
-    if (*vzb > vmax)
-        vmax = *vzb;
-
-    float distance = sqrtf(powf((*xa - *xb), 2) + powf((*ya - *yb), 2)
-                           + powf((*za - *zb), 2));
-
-    if (distance < SIZE_PARTICLES * 2 * vmax)
-    {
-        float nx = 0;
-        if (*xa != *xb)
-            nx = (*xa - *xb) / fabs(*xa - *xb);
-        float ny = 0;
-        if (*ya != *yb)
-            ny = (*ya - *yb) / fabs(*ya - *yb);
-        float nz = 0;
-        if (*za != *zb)
-            nz = (*za - *zb) / fabs(*za - *zb);
-
-        float vxnormal = (*vxa - *vxb) * powf(nx, 2);
-        float vynormal = (*vya - *vyb) * powf(ny, 2);
-        float vznormal = (*vza - *vzb) * powf(nz, 2);
-        *vxa -= vxnormal;
-        *vxb += vxnormal;
-        *vya -= vynormal;
-        *vyb += vynormal;
-        *vza -= vznormal;
-        *vzb += vznormal;
-
-        temp1 = a;
-        sprintf(txt1, "%s", "col");
-        temp2 = b;
-        sprintf(txt2, "%s", "col");
-        // temp3 = shift;
-        // sprintf(txt3, "%s", "sh<");
-        // temp4 = shift;
-        // sprintf(txt4, "%s", "sh>");
-
-        // if ((fabs(vxnormal)!=0) & (fabs(vynormal)==0))
-        // {
-        //     if (*ya<*yb)
-        //     {
-        //         *vya=-vxnormal/4;
-        //         *vyb=vxnormal/4;
-        //     }
-        //     if (*ya>*yb)
-        //     {
-        //         *vya=vxnormal/4;
-        //         *vyb=-vxnormal/4;
-        //     }
-        // }
-        // if ((fabs(vxnormal)!=0) & (fabs(vznormal)==0))
-        // {
-        //     if (*za<*zb)
-        //     {
-        //         *vza=-vxnormal/4;
-        //         *vzb=vxnormal/4;
-        //     }
-        //     if (*za>*zb)
-        //     {
-        //         *vza=vxnormal/4;
-        //         *vzb=-vxnormal/4;
-        //     }
-        // }
-    }
-
-    *xa += *vxa * UPDATE_TIME;
-    *xb += *vxb * UPDATE_TIME;
-
-    *ya += *vya * UPDATE_TIME;
-    *yb += *vyb * UPDATE_TIME;
-
-    *za += *vza * UPDATE_TIME;
-    *zb += *vzb * UPDATE_TIME;
-
-    return 1;
-}
-
 
 float checkAttraction(float a, float b)
 {
@@ -384,32 +261,10 @@ float checkAttraction(float a, float b)
 
 void attraction(void)
 {
-    for (int p=0; p<NB_PARTICLES; p++)
-    {
-        thrd_t th[NB_THREAD];
-        int th_nb=0;
-        for (int j=0; j<NB_PARTICLES;j++)
-        {
-            if (j!=p) 
-            {
-                struct duo *dab;
-                dab=malloc(sizeof(struct duo));
-                dab->a=p;
-                dab->b=j;
-                thrd_create(th+th_nb, attraction2, &dab);
-                th_nb+=1;
-                bounce(p);
-                bounce(j);
-            }
-        }
-        // gravity1(p);
-        for (int j=0; j<NB_THREAD; j++)
-        {
-            int res;
-            thrd_join (th[j], &res);
-        }
-        glutPostRedisplay();
-    }
+    attraction1(0, 1);
+    bounce(0);
+    bounce(1);
+    glutPostRedisplay();
 }
 
 void stopRotation(void)
@@ -445,7 +300,6 @@ void zoom(void)
     glRotated(totalRotationY, 1, 0, 0);
     glRotated(totalRotationX, 0, 1, 0);
 }
-
 void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -542,10 +396,10 @@ void display(void)
 
     glutSwapBuffers();
 
-    // temp1 = pointOfView;
-    // sprintf(txt1, "%s", "pof");
-    // temp2 = 0;
-    // sprintf(txt2, "%s", "--");
+    temp1 = pointOfView;
+    sprintf(txt1, "%s", "pof");
+    temp2 = 0;
+    sprintf(txt2, "%s", "--");
     temp3 = totalRotationX;
     sprintf(txt3, "%s", "A x");
     temp4 = totalRotationY;

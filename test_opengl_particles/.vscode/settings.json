@@ -3,6 +3,7 @@
     "files.associations": {
         "window3d.h": "c",
         "stdlib.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "glut.h": "c"
     }
 }
