@@ -43,6 +43,7 @@ struct duo
 {
   int a;
   int b;
+  int thread;
 };
 
 void intit_particles(void);
