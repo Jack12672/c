@@ -1,7 +1,7 @@
 // gcc window3d.c -o w3d -lGL -lGLU -lglut -lm
 
 #include "window3d.h"
-#include <threads.h>
+#include <pthread.h>
 #include <GL/glut.h>
 #include <math.h>
 #include <stdio.h>
@@ -136,7 +136,7 @@ void *attraction2(void *arg)
     int a=d->a;
     int b=d->b;
     int th=d->thread;
-    printf("thread %i  a=%i  b=%i  \n",th,a,b);
+    printf("thread %i  a=%i  b=%i  \n",*th,*a,*b);
     float *xa = &particles[a]->x;
     float *xb = &particles[b]->x;
     float *vxa = &particles[a]->vx;
@@ -215,29 +215,31 @@ void attraction(void)
 {
     for (int p=0; p<NB_PARTICLES; p++)
     {
-        thrd_t th[NB_THREAD];
+        pthread_t th;
         int th_nb=0;
-        for (int j=0; j<NB_PARTICLES;j++)
+        for (int j=0; j<1;j++)
         {
-            if (j!=p) 
-            {
+            // if (j!=p) 
+            // {
+            int j=1;
                 struct duo *dab;
                 dab=malloc(sizeof(struct duo));
                 dab->a=p;
                 dab->b=j;
                 dab->thread=th_nb;
-                thrd_create(th+th_nb, attraction2, &dab);
+                printf("0 thread %i  a=%i  b=%i  \n",dab->thread,dab->a,dab->b);
+                pthread_create(&th, NULL, attraction2, &dab);
                 th_nb+=1;
                 bounce(p);
                 bounce(j);
                 free (dab);
-            }
+            // }
         }
         // gravity1(p);
-        for (int j=0; j<NB_THREAD; j++)
+        for (int j=0; j<1; j++)
         {
-            int res;
-            thrd_join (th[j], &res);
+            int *res;
+            pthread_join (th, (void *) &res);
             free(res);
         }
         glutPostRedisplay();

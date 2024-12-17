@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <threads.h>
+#include <pthread.h>
 
 #define NB_THREAD 3
 #define NB_PARTICLES  3
