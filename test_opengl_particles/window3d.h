@@ -8,8 +8,8 @@
 #include <pthread.h>
 
 #define NB_THREAD 3
-#define NB_PARTICLES  3
-#define SIZE_PARTICLES 2
+#define NB_PARTICLES  8000
+#define SIZE_PARTICLES 0.35
 #define W 120
 #define H 100
 #define WINDOW_W 1600
@@ -39,12 +39,12 @@ struct particle
   int att[4];
 };
 
-struct duo
+typedef struct inputThread
 {
   int a;
   int b;
   int thread;
-};
+}inputThread_t;
 
 void intit_particles(void);
 void init(void);

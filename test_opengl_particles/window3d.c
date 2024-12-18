@@ -56,34 +56,43 @@ void intit_particles(void)
         particles[i]->vx = vx;
         particles[i]->vy = vy;
         particles[i]->vz = vz;
-        int pos=1;
-        for (int j=0; j<NB_PARTICLES;j++)
+        particles[i]->att[0]=0;
+    }
+
+    for (int a=0; a<NB_PARTICLES;a++)
+    {
+        float max1=H*W;
+        float max2=H*W;
+        float max3=H*W;
+        float xa = particles[a]->x;
+        float ya = particles[a]->y;
+        float za = particles[a]->z;
+        for (int b=0; b<NB_PARTICLES;b++)
         {
-            if (j!=i) 
+            if (a!=b) 
             {
-                particles[i]->att[pos]=j;
-                pos+=1;
+                float xb = particles[b]->x;        
+                float yb = particles[b]->y;
+                float zb = particles[b]->z;
+                float distance = sqrtf(powf((xa - xb), 2) + powf((ya - yb), 2)
+                                + powf((za - zb), 2));
+                if (max3>distance) 
+                {
+                    max3=distance;
+                    particles[a]->att[3]=b;
+                    if (max2>max3) 
+                    {
+                        max2=max3;
+                        particles[a]->att[2]=b;
+                        if (max1>max2) 
+                        {
+                            max1=max2;
+                            particles[a]->att[1]=b;
+                        }
+                    }
+                }
             }
         }
-        
-        // if (i == 0)
-        // {
-        //     particles[i]->x = 10;
-        //     particles[i]->y = 53;
-        //     particles[i]->z = 100;
-        //     particles[i]->vx = 1;
-        //     particles[i]->vy = 0.2;
-        //     particles[i]->vz = -1;
-        // }
-        // if (i == 1)
-        // {
-        //     particles[i]->x = 90;
-        //     particles[i]->y = 50;
-        //     particles[i]->z = 50;
-        //     particles[i]->vx = -1;
-        //     particles[i]->vy = 0.5;
-        //     particles[i]->vz = -0.5;
-        // }
     }
 }
 
@@ -130,121 +139,122 @@ void bounce(int i)
     }
 }
 
-void *attraction2(void *arg)
+void attraction2(int a)
 {
-    struct duo *d = (struct duo *)arg;
-    int a=d->a;
-    int b=d->b;
-    int th=d->thread;
-    printf("thread %i  a=%i  b=%i  \n",*th,*a,*b);
-    float *xa = &particles[a]->x;
-    float *xb = &particles[b]->x;
-    float *vxa = &particles[a]->vx;
-    float vmax = *vxa;
-    float *vxb = &particles[b]->vx;
-    if (*vxb > vmax)
-        vmax = *vxb;
-
-    float *ya = &particles[a]->y;
-    float *yb = &particles[b]->y;
-    float *vya = &particles[a]->vy;
-    if (*vya > vmax)
-        vmax = *vya;
-    float *vyb = &particles[b]->vy;
-    if (*vyb > vmax)
-        vmax = *vyb;
-
-    float *za = &particles[a]->z;
-    float *zb = &particles[b]->z;
-    float *vza = &particles[a]->vz;
-    if (*vza > vmax)
-        vmax = *vza;
-    float *vzb = &particles[b]->vz;
-    if (*vzb > vmax)
-        vmax = *vzb;
-
-    float distance = sqrtf(powf((*xa - *xb), 2) + powf((*ya - *yb), 2)
-                           + powf((*za - *zb), 2));
-
-    if (distance < SIZE_PARTICLES * 2 * vmax)
+    particles[a]->att[0]=1;
+    for (int i=1; i<4; i++)
     {
-        float nx = 0;
-        if (*xa != *xb)
-            nx = (*xa - *xb) / fabs(*xa - *xb);
-        float ny = 0;
-        if (*ya != *yb)
-            ny = (*ya - *yb) / fabs(*ya - *yb);
-        float nz = 0;
-        if (*za != *zb)
-            nz = (*za - *zb) / fabs(*za - *zb);
+        int b=particles[a]->att[i];
+        particles[b]->att[0]=1;
+        float *xa = &particles[a]->x;
+        float *xb = &particles[b]->x;
+        float *vxa = &particles[a]->vx;
+        float vmax = *vxa;
+        float *vxb = &particles[b]->vx;
+        if (*vxb > vmax)
+            vmax = *vxb;
 
-        float vxnormal = (*vxa - *vxb) * powf(nx, 2);
-        float vynormal = (*vya - *vyb) * powf(ny, 2);
-        float vznormal = (*vza - *vzb) * powf(nz, 2);
-        *vxa -= vxnormal;
-        *vxb += vxnormal;
-        *vya -= vynormal;
-        *vyb += vynormal;
-        *vza -= vznormal;
-        *vzb += vznormal;
+        float *ya = &particles[a]->y;
+        float *yb = &particles[b]->y;
+        float *vya = &particles[a]->vy;
+        if (*vya > vmax)
+            vmax = *vya;
+        float *vyb = &particles[b]->vy;
+        if (*vyb > vmax)
+            vmax = *vyb;
 
-        temp1 = a;
-        sprintf(txt1, "%s", "col");
-        temp2 = b;
-        sprintf(txt2, "%s", "col");
-        // temp3 = shift;
-        // sprintf(txt3, "%s", "sh<");
-        // temp4 = shift;
-        // sprintf(txt4, "%s", "sh>");
+        float *za = &particles[a]->z;
+        float *zb = &particles[b]->z;
+        float *vza = &particles[a]->vz;
+        if (*vza > vmax)
+            vmax = *vza;
+        float *vzb = &particles[b]->vz;
+        if (*vzb > vmax)
+            vmax = *vzb;
+
+        float distance = sqrtf(powf((*xa - *xb), 2) + powf((*ya - *yb), 2)
+                            + powf((*za - *zb), 2));
+
+        if (distance < SIZE_PARTICLES * 2 * vmax)
+        {
+            float nx = 0;
+            if (*xa != *xb)
+                nx = (*xa - *xb) / fabs(*xa - *xb);
+            float ny = 0;
+            if (*ya != *yb)
+                ny = (*ya - *yb) / fabs(*ya - *yb);
+            float nz = 0;
+            if (*za != *zb)
+                nz = (*za - *zb) / fabs(*za - *zb);
+
+            float vxnormal = (*vxa - *vxb) * powf(nx, 2);
+            float vynormal = (*vya - *vyb) * powf(ny, 2);
+            float vznormal = (*vza - *vzb) * powf(nz, 2);
+            *vxa -= vxnormal;
+            *vxb += vxnormal;
+            *vya -= vynormal;
+            *vyb += vynormal;
+            *vza -= vznormal;
+            *vzb += vznormal;
+        }
+
+        *xa += *vxa * UPDATE_TIME;
+        *xb += *vxb * UPDATE_TIME;
+
+        *ya += *vya * UPDATE_TIME;
+        *yb += *vyb * UPDATE_TIME;
+
+        *za += *vza * UPDATE_TIME;
+        *zb += *vzb * UPDATE_TIME;
     }
-
-    *xa += *vxa * UPDATE_TIME;
-    *xb += *vxb * UPDATE_TIME;
-
-    *ya += *vya * UPDATE_TIME;
-    *yb += *vyb * UPDATE_TIME;
-
-    *za += *vza * UPDATE_TIME;
-    *zb += *vzb * UPDATE_TIME;
-
-    int *res=0;
-    return (void *) res;
 }   
+
 
 void attraction(void)
 {
-    for (int p=0; p<NB_PARTICLES; p++)
+    for (int i=0; i<NB_PARTICLES;i++)
     {
-        pthread_t th;
-        int th_nb=0;
-        for (int j=0; j<1;j++)
+        if (particles[i]->att[0]==0)
+            attraction2(i);
+        for (int j=1;j<4;j++)
+            bounce(particles[i]->att[j]);
+        bounce(i);
+    }
+    glutPostRedisplay();
+    for (int a=0; a<NB_PARTICLES;a++)
         {
-            // if (j!=p) 
+            float max1=H*W;
+            float max2=H*W;
+            float max3=H*W;
+            float xa = particles[a]->x;
+            float ya = particles[a]->y;
+            float za = particles[a]->z;
+            particles[a]->att[0]=0;
+            // for (int j=1; j<4;j++)
             // {
-            int j=1;
-                struct duo *dab;
-                dab=malloc(sizeof(struct duo));
-                dab->a=p;
-                dab->b=j;
-                dab->thread=th_nb;
-                printf("0 thread %i  a=%i  b=%i  \n",dab->thread,dab->a,dab->b);
-                pthread_create(&th, NULL, attraction2, &dab);
-                th_nb+=1;
-                bounce(p);
-                bounce(j);
-                free (dab);
+            //     int b=particles[a]->
+            //     float xb = particles[b]->x;        
+            //     float yb = particles[b]->y;
+            //     float zb = particles[b]->z;
+            //     float distance = sqrtf(powf((xa - xb), 2) + powf((ya - yb), 2)
+            //                     + powf((za - zb), 2));
+            //     if (max3>distance) 
+            //     {
+            //         max3=distance;
+            //         particles[a]->att[3]=b;
+            //         if (max2>max3) 
+            //         {
+            //             max2=max3;
+            //             particles[a]->att[2]=b;
+            //             if (max1>max2) 
+            //             {
+            //                 max1=max2;
+            //                 particles[a]->att[1]=b;
+            //             }
             // }
         }
-        // gravity1(p);
-        for (int j=0; j<1; j++)
-        {
-            int *res;
-            pthread_join (th, (void *) &res);
-            free(res);
-        }
-        glutPostRedisplay();
-    }
 }
+
 
 void stopRotation(void)
 {
