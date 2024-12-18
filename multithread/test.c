@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 
-#define NB 2
+#define NB 12
 
 
 
@@ -24,14 +25,13 @@ void *minmax(void *arguments){
     int thread = args->thread;
     int min=args->val[0];
     int max=args->val[0];
-    printf("__start thread %d__",thread);
+    printf("__start thread %d__\n",thread);
     for (int i=1; i<10;i++)
     {
+
         if (args->val[i]>max) max=args->val[i];
         if (args->val[i]<min) min=args->val[i];
     }
-
-
     rep_t *rep = malloc(sizeof(rep_t));
         rep->max = max;
         rep->min = min;
@@ -42,7 +42,7 @@ int main()
 {
     srand(time(NULL));
     args_t arg[NB];
-    pthread_t thread[2];
+    pthread_t thread[NB];
     for (int t=0; t<NB;t++)
     {
         arg[t].thread=t;
@@ -53,8 +53,7 @@ int main()
                 printf("%d | ",arg[t].val[i]);}
             printf("\n");
 
-            pthread_create(&thread[t], NULL, minmax, &arg);
-            printf("+++++");
+            pthread_create(&thread[t], NULL, minmax, &arg[t]);
         }
     }
     
