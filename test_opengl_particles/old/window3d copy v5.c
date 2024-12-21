@@ -82,20 +82,12 @@ void intit_particles(void)
                     particles[a]->att[3]=b;
                     if (max2>max3) 
                     {
-                        float tmp=0;
-                        tmp=max2;
                         max2=max3;
-                        max3=tmp;
                         particles[a]->att[2]=b;
-                        max3=H*W;
                         if (max1>max2) 
                         {
-                            float tmp=0;
-                            tmp=max1;
                             max1=max2;
-                            max2=tmp;
                             particles[a]->att[1]=b;
-
                         }
                     }
                 }
@@ -217,6 +209,7 @@ void attraction2(int a)
     }
 }   
 
+
 void attraction(void)
 {
     for (int i=0; i<NB_PARTICLES;i++)
@@ -262,6 +255,7 @@ void attraction(void)
         }
 }
 
+
 void stopRotation(void)
 {
     cameraAngleX = 0;
@@ -271,8 +265,25 @@ void stopRotation(void)
     reshape(WINDOW_W, WINDOW_H);
 }
 
+void stopRotationX(void)
+{
+    glRotated(-totalRotationX, 0, 1, 0);
+    cameraAngleX = 0;
+    totalRotationX = 0;
+    glutPostRedisplay();
+}
+
+void stopRotationY(void)
+{
+    glRotated(-totalRotationY, 1, 0, 0);
+    cameraAngleY = 0;
+    totalRotationY = 0;
+    glutPostRedisplay();
+}
+
 void zoom(void)
 {
+    // printf("start2\n");
     glLoadIdentity();
     reshape(WINDOW_W, WINDOW_H);
     glRotated(totalRotationY, 1, 0, 0);
@@ -374,6 +385,15 @@ void display(void)
     glPopMatrix();
 
     glutSwapBuffers();
+
+    // temp1 = pointOfView;
+    // sprintf(txt1, "%s", "pof");
+    // temp2 = 0;
+    // sprintf(txt2, "%s", "--");
+    temp3 = totalRotationX;
+    sprintf(txt3, "%s", "A x");
+    temp4 = totalRotationY;
+    sprintf(txt4, "%s", "A y");
 }
 
 void reshape(int w, int h)
@@ -443,26 +463,6 @@ void keyboard(unsigned char key, int x, int y)
         particles[0]->vx = 0;
         glutPostRedisplay();
         break;
-    case '0' :
-        temp1=particles[0]->att[1];
-        temp2=particles[0]->att[2];
-        temp3=particles[0]->att[3];
-        temp4=0;
-    case '1' :
-        temp1=particles[1]->att[1];
-        temp2=particles[1]->att[2];
-        temp3=particles[1]->att[3];
-        temp4=1;
-    case '2' :
-        temp1=particles[2]->att[1];
-        temp2=particles[2]->att[2];
-        temp3=particles[2]->att[3];
-        temp4=2;
-    case '3' :
-        temp1=particles[3]->att[1];
-        temp2=particles[3]->att[2];
-        temp3=particles[3]->att[3];
-        temp4=3;
 
     default:
         break;
@@ -547,7 +547,173 @@ int main(int argc, char **argv)
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
     glutMotionFunc(mousemotion);
+    // glutIdleFunc(gravity);
     glutIdleFunc(attraction);
     glutMainLoop();
     return 0;
 }
+
+// int dist=(int)distance;
+// if (dist > 11)
+//         att = Forces[11]*UPDATE_TIME;
+//     else
+//         att = Forces(dist]*UPDATE_TIME;
+
+//     float att = 0;
+//     int dist = abs((int)(*xb - *xa));
+//     if (dist > 11)
+//         att = Forces[11];
+//     else
+//         att = Forces[abs(dist)];
+
+//     direction *= att * UPDATE_TIME;
+
+// *vxa += direction;
+
+
+void attraction1(int a, int b)
+{
+    float *xa = &particles[a]->x;
+    float *xb = &particles[b]->x;
+    float *vxa = &particles[a]->vx;
+    float vmax = *vxa;
+    float *vxb = &particles[b]->vx;
+    if (*vxb > vmax)
+        vmax = *vxb;
+
+    float *ya = &particles[a]->y;
+    float *yb = &particles[b]->y;
+    float *vya = &particles[a]->vy;
+    if (*vya > vmax)
+        vmax = *vya;
+    float *vyb = &particles[b]->vy;
+    if (*vyb > vmax)
+        vmax = *vyb;
+
+    float *za = &particles[a]->z;
+    float *zb = &particles[b]->z;
+    float *vza = &particles[a]->vz;
+    if (*vza > vmax)
+        vmax = *vza;
+    float *vzb = &particles[b]->vz;
+    if (*vzb > vmax)
+        vmax = *vzb;
+
+    float distance = sqrtf(powf((*xa - *xb), 2) + powf((*ya - *yb), 2)
+                           + powf((*za - *zb), 2));
+
+    if (distance < SIZE_PARTICLES * 2 * vmax)
+    {
+        float nx = 0;
+        if (*xa != *xb)
+            nx = (*xa - *xb) / fabs(*xa - *xb);
+        float ny = 0;
+        if (*ya != *yb)
+            ny = (*ya - *yb) / fabs(*ya - *yb);
+        float nz = 0;
+        if (*za != *zb)
+            nz = (*za - *zb) / fabs(*za - *zb);
+
+        float vxnormal = (*vxa - *vxb) * powf(nx, 2);
+        float vynormal = (*vya - *vyb) * powf(ny, 2);
+        float vznormal = (*vza - *vzb) * powf(nz, 2);
+        *vxa -= vxnormal;
+        *vxb += vxnormal;
+        *vya -= vynormal;
+        *vyb += vynormal;
+        *vza -= vznormal;
+        *vzb += vznormal;
+
+        temp1 = a;
+        sprintf(txt1, "%s", "col");
+        temp2 = b;
+        sprintf(txt2, "%s", "col");
+        // temp3 = shift;
+        // sprintf(txt3, "%s", "sh<");
+        // temp4 = shift;
+        // sprintf(txt4, "%s", "sh>");
+
+        // if ((fabs(vxnormal)!=0) & (fabs(vynormal)==0))
+        // {
+        //     if (*ya<*yb)
+        //     {
+        //         *vya=-vxnormal/4;
+        //         *vyb=vxnormal/4;
+        //     }
+        //     if (*ya>*yb)
+        //     {
+        //         *vya=vxnormal/4;
+        //         *vyb=-vxnormal/4;
+        //     }
+        // }
+        // if ((fabs(vxnormal)!=0) & (fabs(vznormal)==0))
+        // {
+        //     if (*za<*zb)
+        //     {
+        //         *vza=-vxnormal/4;
+        //         *vzb=vxnormal/4;
+        //     }
+        //     if (*za>*zb)
+        //     {
+        //         *vza=vxnormal/4;
+        //         *vzb=-vxnormal/4;
+        //     }
+        // }
+    }
+
+    *xa += *vxa * UPDATE_TIME;
+    *xb += *vxb * UPDATE_TIME;
+
+    *ya += *vya * UPDATE_TIME;
+    *yb += *vyb * UPDATE_TIME;
+
+    *za += *vza * UPDATE_TIME;
+    *zb += *vzb * UPDATE_TIME;
+}
+
+
+float checkAttraction(float a, float b)
+{
+    float direction = 0;
+    if (a <= b)
+        direction = -1;
+    else
+        direction = 1;
+
+    int dist = abs((int)(b - a));
+    float att = 0;
+
+    if (dist > 11)
+        att = Forces[11];
+    else
+        att = Forces[abs(dist)];
+
+    if (att > maximum_force)
+        maximum_force = att;
+    direction *= att * UPDATE_TIME;
+
+    return direction;
+}
+
+void gravity(void)
+{
+    for (int i = 0; i < NB_PARTICLES; i++)
+    {
+        particles[i]->x += particles[i]->vx * UPDATE_TIME;
+        particles[i]->z += particles[i]->vz * UPDATE_TIME;
+        particles[i]->y += -G / 2 * pow(UPDATE_TIME, 2) + particles[i]->vy;
+        particles[i]->vy -= G / 2 * pow(UPDATE_TIME, 2);
+        bounce(i);
+    }
+    glutPostRedisplay();
+}
+
+void gravity1(int part)
+    {
+        particles[part]->y += -G / 2 * pow(UPDATE_TIME, 2) + particles[part]->vy;
+        particles[part]->vy -= G / 2 * pow(UPDATE_TIME, 2);
+        if (particles[part]->vy >0.5) particles[part]->vy =0.5;
+        if (particles[part]->vy <-0.5) particles[part]->vy =-0.5;
+        bounce(part);
+    }
+
