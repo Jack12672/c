@@ -37,6 +37,66 @@ static float Forces[12] = { 4,     0.33,  0.01,  -0.96, -0.73, -0.45,
 
 struct particle *particles[NB_PARTICLES];
 
+
+void minDistance2values (int a, int b)
+{
+    float max1=H*W;
+    float max2=H*W;
+    float max3=H*W;
+
+    float *xa = &particles[a]->x;
+    float *ya = &particles[a]->y;
+    float *za = &particles[a]->z;
+    
+    float *xb = &particles[b]->x;        
+    float *yb = &particles[b]->y;
+    float *zb = &particles[b]->z;
+
+    int *at1=&particles[a]->att[1];
+    int *at2=&particles[a]->att[2];
+    int *at3=&particles[a]->att[3];
+
+
+
+    float distance = sqrtf(powf((*xa - *xb), 2) + powf((*ya - *yb), 2)
+                                + powf((*za - *zb), 2));
+    
+    if (max3>distance) 
+    {
+        max3=distance;
+        *at3=b;
+        if (max2>max3) 
+        {
+            float tmp=0;
+            tmp=max2;
+            max2=max3;
+            max3=tmp;
+            int *t=&particles[a]->att[2];
+            *at2=b;
+            *at3=*t;
+            if (max1>max2) 
+            {
+                float tmp=0;
+                tmp=max1;
+                max1=max2;
+                max2=tmp;
+                int *t=&particles[a]->att[1];
+                *at1=b;
+                int *t1=&particles[a]->att[2];
+                *at2=*t;
+                *at3=*t1;
+            }
+        }
+    }
+    printf("%i   %i  |  %d   %d   %d\n",a,b,*at1,*at2, *at3);
+}
+
+
+// void minDistance3d (int a0, int a1, int a2, int a3)
+// {
+//  intit_particles();
+//  }
+
 void intit_particles(void)
 {
     srand(time(NULL));
@@ -61,44 +121,11 @@ void intit_particles(void)
 
     for (int a=0; a<NB_PARTICLES;a++)
     {
-        float max1=H*W;
-        float max2=H*W;
-        float max3=H*W;
-        float xa = particles[a]->x;
-        float ya = particles[a]->y;
-        float za = particles[a]->z;
         for (int b=0; b<NB_PARTICLES;b++)
         {
             if (a!=b) 
             {
-                float xb = particles[b]->x;        
-                float yb = particles[b]->y;
-                float zb = particles[b]->z;
-                float distance = sqrtf(powf((xa - xb), 2) + powf((ya - yb), 2)
-                                + powf((za - zb), 2));
-                if (max3>distance) 
-                {
-                    max3=distance;
-                    particles[a]->att[3]=b;
-                    if (max2>max3) 
-                    {
-                        float tmp=0;
-                        tmp=max2;
-                        max2=max3;
-                        max3=tmp;
-                        particles[a]->att[2]=b;
-                        max3=H*W;
-                        if (max1>max2) 
-                        {
-                            float tmp=0;
-                            tmp=max1;
-                            max1=max2;
-                            max2=tmp;
-                            particles[a]->att[1]=b;
-
-                        }
-                    }
-                }
+                minDistance2values(a,b);
             }
         }
     }
@@ -221,22 +248,33 @@ void attraction(void)
 {
     for (int i=0; i<NB_PARTICLES;i++)
     {
-        if (particles[i]->att[0]==0)
-            attraction2(i);
-        for (int j=1;j<4;j++)
-            bounce(particles[i]->att[j]);
+        attraction2(i);
         bounce(i);
     }
     glutPostRedisplay();
-    for (int a=0; a<NB_PARTICLES;a++)
-        {
-            float max1=H*W;
-            float max2=H*W;
-            float max3=H*W;
-            float xa = particles[a]->x;
-            float ya = particles[a]->y;
-            float za = particles[a]->z;
-            particles[a]->att[0]=0;
+    // for (int a=0; a<NB_PARTICLES;a++)
+    // {
+    //     particles[a]->att[0]=0;
+    // }
+
+    // for (int a=0; a<NB_PARTICLES;a++)
+    // {
+    //     int b[4];
+    //     for (i=0;i<4;i++)
+    //         b[i]=particles[a]->att[i+1];
+        
+    //     for(int i=0; i<4;i++)
+    //     {
+    //         do 
+    //     }
+    // }
+            // float max1=H*W;
+            // float max2=H*W;
+            // float max3=H*W;
+            // float xa = particles[a]->x;
+            // float ya = particles[a]->y;
+            // float za = particles[a]->z;
+            
             // for (int j=1; j<4;j++)
             // {
             //     int b=particles[a]->
@@ -259,7 +297,7 @@ void attraction(void)
             //                 particles[a]->att[1]=b;
             //             }
             // }
-        }
+        
 }
 
 void stopRotation(void)

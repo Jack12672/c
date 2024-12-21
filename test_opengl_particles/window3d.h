@@ -8,7 +8,7 @@
 #include <pthread.h>
 
 #define NB_THREAD 3
-#define NB_PARTICLES  4
+#define NB_PARTICLES  40
 #define SIZE_PARTICLES 0.35
 #define W 120
 #define H 100
