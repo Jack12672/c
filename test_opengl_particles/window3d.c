@@ -30,72 +30,52 @@ static char txt1[5];
 static char txt2[5];
 static char txt3[5];
 static char txt4[5];
-static float maximum_force = 0;
 
-static float Forces[12] = { 4,     0.33,  0.01,  -0.96, -0.73, -0.45,
-                            -0.27, -0.13, -0.06, -0.02, -0.01, 0 };
+// static float Forces[12] = { 4,     0.33,  0.01,  -0.96, -0.73, -0.45,
+//                             -0.27, -0.13, -0.06, -0.02, -0.01, 0 };
 
 struct particle *particles[NB_PARTICLES];
 
-
-void minDistance2values (int a, int b)
+void minDistance(int a, int b)
 {
-    float max1=H*W;
-    float max2=H*W;
-    float max3=H*W;
-
-    float *xa = &particles[a]->x;
-    float *ya = &particles[a]->y;
-    float *za = &particles[a]->z;
+    float xa = particles[a]->x;
+    float ya = particles[a]->y;
+    float za = particles[a]->z;
     
-    float *xb = &particles[b]->x;        
-    float *yb = &particles[b]->y;
-    float *zb = &particles[b]->z;
+    float xb = particles[b]->x;        
+    float yb = particles[b]->y;
+    float zb = particles[b]->z;
 
-    int *at1=&particles[a]->att[1];
-    int *at2=&particles[a]->att[2];
-    int *at3=&particles[a]->att[3];
+    float d1=particles[a]->dist[1];
+    float d2=particles[a]->dist[2];
+    float d3=particles[a]->dist[3];
 
 
+    float distance = sqrtf(powf((xa - xb), 2) + powf((ya - yb), 2)
+                                + powf((za - zb), 2));
 
-    float distance = sqrtf(powf((*xa - *xb), 2) + powf((*ya - *yb), 2)
-                                + powf((*za - *zb), 2));
-    
-    if (max3>distance) 
+    if (distance<d1)
     {
-        max3=distance;
-        *at3=b;
-        if (max2>max3) 
-        {
-            float tmp=0;
-            tmp=max2;
-            max2=max3;
-            max3=tmp;
-            int *t=&particles[a]->att[2];
-            *at2=b;
-            *at3=*t;
-            if (max1>max2) 
-            {
-                float tmp=0;
-                tmp=max1;
-                max1=max2;
-                max2=tmp;
-                int *t=&particles[a]->att[1];
-                *at1=b;
-                int *t1=&particles[a]->att[2];
-                *at2=*t;
-                *at3=*t1;
-            }
-        }
+        particles[a]->dist[3]=particles[a]->dist[2];
+        particles[a]->dist[2]=particles[a]->dist[1];
+        particles[a]->dist[1]=distance;
+        particles[a]->att[3]=particles[a]->att[2];
+        particles[a]->att[2]=particles[a]->att[1];
+        particles[a]->att[1]=b;
     }
-    printf("%i   %i  |  %d   %d   %d\n",a,b,*at1,*at2, *at3);
+    else if (distance<d2)
+    {
+        particles[a]->dist[3]=particles[a]->dist[2];
+        particles[a]->dist[2]=distance;
+        particles[a]->att[3]=particles[a]->att[2];
+        particles[a]->att[2]=b;
+    }  
+    else if (distance<d3)
+    {
+        particles[a]->dist[3]=distance;
+        particles[a]->att[3]=b;
+    }      
 }
-
-
-// void minDistance3d (int a0, int a1, int a2, int a3)
-// {
-//  intit_particles();
-//  }
 
 void intit_particles(void)
 {
@@ -117,6 +97,8 @@ void intit_particles(void)
         particles[i]->vy = vy;
         particles[i]->vz = vz;
         particles[i]->att[0]=0;
+        for (int j=1;j<4;j++)
+            particles[i]->dist[j]=H*W;
     }
 
     for (int a=0; a<NB_PARTICLES;a++)
@@ -125,9 +107,10 @@ void intit_particles(void)
         {
             if (a!=b) 
             {
-                minDistance2values(a,b);
+                minDistance(a,b);
             }
         }
+        printf("%i     |  1=%i  2=%i  3=%i \n",a,particles[a]->att[1],particles[a]->att[2],particles[a]->att[3]);
     }
 }
 
@@ -250,53 +233,15 @@ void attraction(void)
     {
         attraction2(i);
         bounce(i);
+    
+    // for (int a=1; a<4;a++)
+    // {
+        
+    // }
     }
     glutPostRedisplay();
-    // for (int a=0; a<NB_PARTICLES;a++)
-    // {
-    //     particles[a]->att[0]=0;
-    // }
 
-    // for (int a=0; a<NB_PARTICLES;a++)
-    // {
-    //     int b[4];
-    //     for (i=0;i<4;i++)
-    //         b[i]=particles[a]->att[i+1];
-        
-    //     for(int i=0; i<4;i++)
-    //     {
-    //         do 
-    //     }
-    // }
-            // float max1=H*W;
-            // float max2=H*W;
-            // float max3=H*W;
-            // float xa = particles[a]->x;
-            // float ya = particles[a]->y;
-            // float za = particles[a]->z;
-            
-            // for (int j=1; j<4;j++)
-            // {
-            //     int b=particles[a]->
-            //     float xb = particles[b]->x;        
-            //     float yb = particles[b]->y;
-            //     float zb = particles[b]->z;
-            //     float distance = sqrtf(powf((xa - xb), 2) + powf((ya - yb), 2)
-            //                     + powf((za - zb), 2));
-            //     if (max3>distance) 
-            //     {
-            //         max3=distance;
-            //         particles[a]->att[3]=b;
-            //         if (max2>max3) 
-            //         {
-            //             max2=max3;
-            //             particles[a]->att[2]=b;
-            //             if (max1>max2) 
-            //             {
-            //                 max1=max2;
-            //                 particles[a]->att[1]=b;
-            //             }
-            // }
+
         
 }
 
@@ -486,21 +431,25 @@ void keyboard(unsigned char key, int x, int y)
         temp2=particles[0]->att[2];
         temp3=particles[0]->att[3];
         temp4=0;
+        break;
     case '1' :
         temp1=particles[1]->att[1];
         temp2=particles[1]->att[2];
         temp3=particles[1]->att[3];
         temp4=1;
+        break;
     case '2' :
         temp1=particles[2]->att[1];
         temp2=particles[2]->att[2];
         temp3=particles[2]->att[3];
         temp4=2;
+        break;
     case '3' :
         temp1=particles[3]->att[1];
         temp2=particles[3]->att[2];
         temp3=particles[3]->att[3];
         temp4=3;
+        break;
 
     default:
         break;

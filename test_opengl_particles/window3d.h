@@ -8,7 +8,7 @@
 #include <pthread.h>
 
 #define NB_THREAD 3
-#define NB_PARTICLES  40
+#define NB_PARTICLES  10
 #define SIZE_PARTICLES 0.35
 #define W 120
 #define H 100
@@ -37,6 +37,7 @@ struct particle
   float vy;
   float vz;
   int att[4];
+  float dist[4];
 };
 
 typedef struct inputThread
