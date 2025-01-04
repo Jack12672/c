@@ -93,9 +93,11 @@ void intit_particles(void)
         particles[i]->x = xx;
         particles[i]->y = yy;
         particles[i]->z = zz;
+        // particles[i]->z = 100;
         particles[i]->vx = vx;
         particles[i]->vy = vy;
         particles[i]->vz = vz;
+        // particles[i]->vz = 0;
         particles[i]->att[0]=0;
         for (int j=1;j<4;j++)
             particles[i]->dist[j]=H*W;
@@ -157,73 +159,78 @@ void bounce(int i)
     }
 }
 
-void attraction2(int a)
+
+void attraction3(int a)
 {
-    particles[a]->att[0]=1;
     for (int i=1; i<4; i++)
     {
         int b=particles[a]->att[i];
-        particles[b]->att[0]=1;
-        float *xa = &particles[a]->x;
-        float *xb = &particles[b]->x;
-        float *vxa = &particles[a]->vx;
-        float vmax = *vxa;
-        float *vxb = &particles[b]->vx;
-        if (*vxb > vmax)
-            vmax = *vxb;
 
-        float *ya = &particles[a]->y;
-        float *yb = &particles[b]->y;
-        float *vya = &particles[a]->vy;
-        if (*vya > vmax)
-            vmax = *vya;
-        float *vyb = &particles[b]->vy;
-        if (*vyb > vmax)
-            vmax = *vyb;
+        float xa = particles[a]->x;
+        float xb = particles[b]->x;
+        float vxa = particles[a]->vx;
+        float vmax = vxa;
+        float vxb = particles[b]->vx;
+        if (vxb > vmax)
+            vmax = vxb;
+        float ya = particles[a]->y;
+        float yb = particles[b]->y;
+        float vya = particles[a]->vy;
+        if (vya > vmax)
+            vmax = vya;
+        float vyb = particles[b]->vy;
+        if (vyb > vmax)
+            vmax = vyb;
+        float za = particles[a]->z;
+        float zb = particles[b]->z;
+        float vza = particles[a]->vz;
+        if (vza > vmax)
+            vmax = vza;
+        float vzb = particles[b]->vz;
+        if (vzb > vmax)
+            vmax = vzb;
 
-        float *za = &particles[a]->z;
-        float *zb = &particles[b]->z;
-        float *vza = &particles[a]->vz;
-        if (*vza > vmax)
-            vmax = *vza;
-        float *vzb = &particles[b]->vz;
-        if (*vzb > vmax)
-            vmax = *vzb;
+        float distance = sqrtf(powf((xa - xb), 2) + powf((ya - yb), 2)
+                            + powf((za - zb), 2));
 
-        float distance = sqrtf(powf((*xa - *xb), 2) + powf((*ya - *yb), 2)
-                            + powf((*za - *zb), 2));
-
-        if (distance < SIZE_PARTICLES * 2 * vmax)
+        if (a==0) {
+        temp1=distance;
+        temp2=SIZE_PARTICLES * 4;}
+        if (distance < SIZE_PARTICLES * 4 ) // *vmax
         {
+            // printf("X");
             float nx = 0;
-            if (*xa != *xb)
-                nx = (*xa - *xb) / fabs(*xa - *xb);
+            if (xa != xb)
+                nx = (xa - xb) / fabs(xa - xb);
             float ny = 0;
-            if (*ya != *yb)
-                ny = (*ya - *yb) / fabs(*ya - *yb);
+            if (ya != yb)
+                ny = (ya - yb) / fabs(ya - yb);
             float nz = 0;
-            if (*za != *zb)
-                nz = (*za - *zb) / fabs(*za - *zb);
+            if (za != zb)
+                nz = (za - zb) / fabs(za - zb);
 
-            float vxnormal = (*vxa - *vxb) * powf(nx, 2);
-            float vynormal = (*vya - *vyb) * powf(ny, 2);
-            float vznormal = (*vza - *vzb) * powf(nz, 2);
-            *vxa -= vxnormal;
-            *vxb += vxnormal;
-            *vya -= vynormal;
-            *vyb += vynormal;
-            *vza -= vznormal;
-            *vzb += vznormal;
+            float vxnormal = (vxa - vxb) * powf(nx, 2);
+            float vynormal = (vya - vyb) * powf(ny, 2);
+            float vznormal = (vza - vzb) * powf(nz, 2);
+            particles[a]->vx -= vxnormal;
+            particles[b]->vx += vxnormal;
+            
+            particles[a]->vy -= vynormal;
+            particles[b]->vy += vynormal;
+
+            particles[a]->vz -= vznormal;
+            particles[b]->vz += vznormal;
         }
 
-        *xa += *vxa * UPDATE_TIME;
-        *xb += *vxb * UPDATE_TIME;
+    
+        particles[a]->x += vxa * UPDATE_TIME;
+        particles[b]->x += vxb * UPDATE_TIME;
 
-        *ya += *vya * UPDATE_TIME;
-        *yb += *vyb * UPDATE_TIME;
+        particles[a]->y += vya * UPDATE_TIME;
+        particles[b]->y += vyb * UPDATE_TIME;
 
-        *za += *vza * UPDATE_TIME;
-        *zb += *vzb * UPDATE_TIME;
+        particles[a]->z += vza * UPDATE_TIME;
+        particles[b]->z += vzb * UPDATE_TIME;
     }
 }   
 
@@ -231,18 +238,41 @@ void attraction(void)
 {
     for (int i=0; i<NB_PARTICLES;i++)
     {
-        attraction2(i);
-        bounce(i);
-    
-    // for (int a=1; a<4;a++)
-    // {
-        
-    // }
+        attraction3(i);
+        bounce(i);   
+        for (int k=1; k<4; k++)
+                particles[i]->dist[k]=H*W;   
+        for (int j=1; j<2;j++)
+        {          
+            int p1=particles[i]->att[1];
+            int p2=particles[i]->att[2];
+            int p3=particles[i]->att[3];   
+            minDistance(i,p1);
+            minDistance(i,p2);
+            minDistance(i,p3);
+            for (int k=1;k<4;k++)
+            {
+                int pp1=particles[p1]->att[k];
+                int pp2=particles[p2]->att[k];
+                int pp3=particles[p3]->att[k];
+
+                if ((pp1!=p1) & (pp1!=p2) & (pp1!=p3) & (pp1!=i))
+                    minDistance(i,pp1);
+                if ((pp2!=p1) & (pp2!=p2) & (pp2!=p3) & (pp2!=i))
+                    minDistance(i,pp2);
+                if ((pp3!=p1) & (pp3!=p2) & (pp3!=p3) & (pp3!=i))
+                    minDistance(i,pp3);
+            }
+                // if (i==0)
+                // {
+                //     temp1=particles[0]->att[1];
+                //     temp2=particles[0]->att[2];
+                //     temp3=particles[0]->att[3];
+                //     temp4=99;
+                // }
+        }
     }
-    glutPostRedisplay();
-
-
-        
+    glutPostRedisplay();      
 }
 
 void stopRotation(void)
@@ -334,7 +364,13 @@ void display(void)
             float y = particles[i]->y * 2 * AREA / H - AREA;
             float z = particles[i]->z * 2 * AREA / H - AREA;
             glPushMatrix();
-            if (i % 2 == 0)
+            if (i==0)
+            {
+                glColor3f(0, 0, 1);
+                glTranslatef(x, y, z);
+                glutWireSphere(SIZE_PARTICLES, 40, 30);
+            }
+            else if (i % 2 == 0)
             {
                 glColor3f(0.7, 0.5, 0.1);
                 glTranslatef(x, y, z);
@@ -449,6 +485,26 @@ void keyboard(unsigned char key, int x, int y)
         temp2=particles[3]->att[2];
         temp3=particles[3]->att[3];
         temp4=3;
+        break;
+    case 'n' :
+        particles[0]->x=10;
+        particles[0]->y=50;
+        particles[0]->z=100;
+        particles[0]->vx=0;
+        particles[0]->vy=0;
+        particles[0]->vz=0;
+
+        particles[1]->x=90;
+        particles[1]->y=50;
+        particles[1]->z=100;
+        particles[1]->vx=0;
+        particles[1]->vy=0;
+        particles[1]->vz=0;
+        break;
+    case 'N' :
+        particles[0]->vx=0.5;
+        particles[1]->vx=-0.5;
+
         break;
 
     default:

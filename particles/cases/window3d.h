@@ -8,8 +8,8 @@
 #include <pthread.h>
 
 #define NB_THREAD 3
-#define NB_PARTICLES  10
-#define SIZE_PARTICLES 0.35
+#define NB_PARTICLES 200
+#define SIZE_PARTICLES 1
 #define W 120
 #define H 100
 #define WINDOW_W 1600
@@ -17,7 +17,7 @@
 #define AREA H / 3 
 #define G 9.81
 #define PI 3.14159
-#define UPDATE_TIME 1
+#define UPDATE_TIME 10
 #define WALL 1    // 0.95   // rebonds
 #define FLOOR 1    // 0.8   // rebonds
 #define EXCITATION 0.3 // vitesse max
@@ -28,16 +28,15 @@
 // gluLookAt(0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 // soit x+/-100 et y+/-100
 
-struct particle 
+struct Grid
 {
-  float x;
-  float y;
-  float z;
-  float vx;
-  float vy;
-  float vz;
-  int att[4];
-  float dist[4];
+  int c[H][H][H];
+  float x[H];
+  float y[H];
+  float z[H];
+  float vx[H];
+  float vy[H];
+  float vz[H];
 };
 
 typedef struct inputThread
