@@ -17,10 +17,10 @@
 #define AREA H / 3 
 #define G 9.81
 #define PI 3.14159
-#define UPDATE_TIME 10
+#define UPDATE_TIME 0.01
 #define WALL 1    // 0.95   // rebonds
 #define FLOOR 1    // 0.8   // rebonds
-#define EXCITATION 0.3 // vitesse max
+#define EXCITATION 1 // vitesse max
 
 
 // H et W définit pour affichage sur la totalité de l'écran l'écran avec:
@@ -48,7 +48,7 @@ typedef struct inputThread
 
 void intit_particles(void);
 void init(void);
-void bounce(int i);
+void bounce(void);
 void gravity(void);
 float checkAttraction(float a, float b);
 void attraction(void);

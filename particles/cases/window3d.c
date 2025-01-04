@@ -51,25 +51,25 @@ void intit_particles(void)
         }
     }
 
-    srand(time(NULL));
-
+    
+    int p=1000;
     for (int i = 0; i < NB_PARTICLES; i++)
     {
         int xx = rand() % H ;
         int yy = rand() % H ;
         int zz = rand() % H ;
-        int vx = rand() % 3 -1;
-        int vy = rand() % 3 -1;
-        int vz = rand() % 3 -1;
+        int vx = (rand() % p);
+        int vy = (rand() % p);
+        int vz = (rand() % p);
         grid->c[xx][yy][zz]=i;
         grid->x[i]=xx;
         grid->y[i]=yy;
         grid->z[i]=zz;
-        grid->vx[i]=vx;
-        grid->vy[i]=vy;
-        grid->vz[i]=vz;
-        printf("%i: x=%i   y=%i   z=%i\n",grid->c[xx][yy][zz],xx,yy,zz);
-        // printf("%i: vx=%i   vy=%i   vz=%i\n",grid->c[xx][yy][zz],grid->vx[i],grid->vy[i],grid->vz[i]);
+        grid->vx[i]=(float)vx/(float)p-0.5;
+        grid->vy[i]=(float)vy/(float)p-0.5;
+        grid->vz[i]=(float)vz/(float)p-0.5;
+        // printf("%i: x=%i   y=%i   z=%i\n",grid->c[xx][yy][zz],xx,yy,zz);
+        // printf("%i: vx=%4.3f   vy=%f   vz=%f\n",grid->c[xx][yy][zz],grid->vx[i],grid->vy[i],grid->vz[i]);
     }
 }
 
@@ -79,87 +79,61 @@ void init(void)
     glShadeModel(GL_FLAT);
 }
 
-void bounce(int i)
+void bounce(void)
 {
-    float x = grid->x[i];
-    float y = grid->y[i];
-    float z = grid->z[i];
-    grid->c[(int)x][(int)y][(int)z]=-1;
-    float vx = grid->vx[i];
-    float vy = grid->vy[i];
-    float vz = grid->vz[i];
-    x+=vx;
-    y+=vy;
-    z+=vz;
 
-    grid->x[i]=x;
-    grid->y[i]=y;
-    grid->z[i]=z;
-    if (grid->y[i] < SIZE_PARTICLES)
-    {
-        grid->y[i] = SIZE_PARTICLES;
-        grid->vy[i]  = - grid->vy[i] * FLOOR; // bounces
-        grid->vx[i] += - grid->vx[i] * (1 - FLOOR); // frictions
-        grid->vz[i] += - grid->vz[i] * (1 - FLOOR); // frictions
-    }
-    if (grid->y[i] > H - SIZE_PARTICLES)
-    {
-        grid->y[i] = H - SIZE_PARTICLES;
-        grid->vy[i] = - grid->vy[i] * WALL;
-    }
-    if (grid->x[i] < SIZE_PARTICLES)
-    {
-        grid->x[i] = SIZE_PARTICLES;
-        grid->vx[i] = - grid->vx[i] * WALL;
-    }
-    if (grid->x[i]> H - SIZE_PARTICLES)
-    {
-        grid->x[i] = H - SIZE_PARTICLES;
-        grid->vx[i]= - grid->vx[i] * WALL;
-    }
-
-    if (grid->z[i] < SIZE_PARTICLES)
-    {
-        grid->z[i] = SIZE_PARTICLES;
-        grid->vz[i] = -grid->vz[i] * WALL;
-    }
-    if (grid->z[i] > H - SIZE_PARTICLES)
-    {
-        grid->z[i] = H - SIZE_PARTICLES;
-        grid->vz[i] = -grid->vz[i] * WALL;
-    }
-    x = grid->x[i];
-    y = grid->y[i];
-    z = grid->z[i];
-    grid->c[(int)x][(int)y][(int)z]=i;
-}
-
-// void attraction1 (int a)
-// {
-//     float x = grid->x[a];
-//     float y = grid->y[a];
-//     float z = grid->z[a];
-//     grid->c[(int)x][(int)y][(int)z]=-1;
-//     float vx = grid->vx[a];
-//     float vy = grid->vy[a];
-//     float vz = grid->vz[a];
-//     x+=vx;
-//     y+=vy;
-//     z+=vz;
-//     grid->c[(int)x][(int)y][(int)z]=a;
-//     grid->x[a]=x;
-//     grid->y[a]=y;
-//     grid->z[a]=z;
-// }
-
-void attraction(void)
-{
     for (int i=0; i<NB_PARTICLES;i++)
     {
-        // attraction1 (i);
-        bounce(i);
+        float x = grid->x[i];
+        float y = grid->y[i];
+        float z = grid->z[i];
+        // grid->c[(int)x][(int)y][(int)z]=-1;
+        float vx = grid->vx[i];
+        float vy = grid->vy[i];
+        float vz = grid->vz[i];
+        x+=vx;
+        y+=vy;
+        z+=vz;
+        grid->x[i] = x;
+        grid->y[i] = y;
+        grid->z[i] = z;
+        if (x <= SIZE_PARTICLES)
+        {
+            grid->x[i] = SIZE_PARTICLES;
+            grid->vx[i] *= -WALL;
+        }
+        else if (x >= H - SIZE_PARTICLES)
+        {
+            grid->x[i] = H - SIZE_PARTICLES;
+            grid->vx[i] *= -WALL;
+        }
+        if (y <= SIZE_PARTICLES)
+        {
+            grid->y[i] = SIZE_PARTICLES;
+            grid->vy[i] *= -WALL; // bounces
+        }
+        else if (y >= H - SIZE_PARTICLES)
+        {
+            grid->y[i] = H - SIZE_PARTICLES;
+            grid->vy[i] *= -WALL;
+        }
+        if (z <= SIZE_PARTICLES)
+        {
+            grid->z[i] = SIZE_PARTICLES;
+            grid->vz[i] *= -WALL;
+        }
+        else if (z >= H - SIZE_PARTICLES)
+        {
+            grid->z[i] = H - SIZE_PARTICLES;
+            grid->vz[i] *= -WALL;
+        }     
+            
+        // grid->c[(int)x][(int)y][(int)z]=i;
     }
-    glutPostRedisplay();      
+    glutPostRedisplay(); 
+
+    return;
+
 }
 
 void stopRotation(void)
@@ -190,34 +164,34 @@ void display(void)
     glRotated(cameraAngleY, 1, 0, 0);
     glPushMatrix();
     {
-        // glColor3f(1, 1, 1);
-        // char str[130];
-        // char str1[30];
-        // char str2[30];
-        // char str3[30];
-        // char str4[30];
+        glColor3f(1, 1, 1);
+        char str[130];
+        char str1[30];
+        char str2[30];
+        char str3[30];
+        char str4[30];
 
-        // sprintf(str, "%s", txt1);
-        // strcat(str, ": ");
-        // sprintf(str1, "%f", temp1);
-        // strcat(str, str1);
-        // strcat(str, " | ");
-        // strcat(str, txt2);
-        // strcat(str, ": ");
-        // sprintf(str2, "%f", temp2);
-        // strcat(str, str2);
-        // strcat(str, " | ");
-        // strcat(str, txt3);
-        // strcat(str, ": ");
-        // sprintf(str3, "%f", temp3);
-        // strcat(str, str3);
-        // strcat(str, " | ");
-        // strcat(str, txt4);
-        // strcat(str, ": ");
-        // sprintf(str4, "%f", temp4);
-        // strcat(str, str4);
+        sprintf(str, "%s", txt1);
+        strcat(str, ": ");
+        sprintf(str1, "%f", temp1);
+        strcat(str, str1);
+        strcat(str, " | ");
+        strcat(str, txt2);
+        strcat(str, ": ");
+        sprintf(str2, "%f", temp2);
+        strcat(str, str2);
+        strcat(str, " | ");
+        strcat(str, txt3);
+        strcat(str, ": ");
+        sprintf(str3, "%f", temp3);
+        strcat(str, str3);
+        strcat(str, " | ");
+        strcat(str, txt4);
+        strcat(str, ": ");
+        sprintf(str4, "%f", temp4);
+        strcat(str, str4);
 
-        // write(-W / 3, H / 2, str, GLUT_BITMAP_9_BY_15);
+        write(-W / 3, H / 2, str, GLUT_BITMAP_9_BY_15);
 
         glBegin(GL_LINE_STRIP);
         glColor4f(1, 0.0, 0.0, 1);
@@ -419,7 +393,8 @@ int main(int argc, char **argv)
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
     glutMotionFunc(mousemotion);
-    glutIdleFunc(attraction);
+    // glutTimerFunc(1,attraction,1);
+    glutIdleFunc(bounce);
     glutMainLoop();
     return 0;
 }
