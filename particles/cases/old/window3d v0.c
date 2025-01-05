@@ -1,10 +1,9 @@
 // gcc window3d.c -o w3d -lGL -lGLU -lglut -lm
 
 #include "window3d.h"
-
+#include <pthread.h>
 #include <GL/glut.h>
 #include <math.h>
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,136 +30,113 @@ static char txt1[5];
 static char txt2[5];
 static char txt3[5];
 static char txt4[5];
-static int xxx = 0;
-static int yyy = 0;
-static int zzz = 0;
-
-static int vxx = 0;
-static int vyy = 0;
-static int vzz = 0;
-
-static int particles[NB_PARTICLES];
-static int velocity[NB_PARTICLES];
 
 // static float Forces[12] = { 4,     0.33,  0.01,  -0.96, -0.73, -0.45,
 //                             -0.27, -0.13, -0.06, -0.02, -0.01, 0 };
 
-// struct Grid *grid;
+struct Grid *grid;
 
-// static int grille [H][H][H];
+static int grille [H][H][H];
 
-int coords_to_int()
-{
-    return (xxx * H + yyy) * H + zzz;
-}
-
-void int_to_coords(int val)
-{
-    zzz = val % H;
-    int temp = val / H;
-    yyy = temp % H;
-    xxx = temp / H;
-}
-
-int velocity_to_int()
-{
-    return ((vxx + 10) * 100 + vyy + 10) * 100 + vzz + 10;
-}
-
-void int_to_velocity(int val)
-{
-    vzz = val % 100 - 10;
-    int temp = val / 100;
-    vyy = temp % 100 - 10;
-    vxx = temp / 100 - 10;
-}
 
 void intit_particles(void)
 {
-    srand(time(NULL));
+    grid=malloc(sizeof(struct Grid));
+    // for (int x=0;x<H;x++)
+    // {
+    //     for (int y=0;y<H;y++)
+    //     {
+    //         for (int z=0;z<H;z++)
+    //         {
+    //             grid->c[x][y][z]=-1;
+    //         }
+    //     }
+    // }
+
+    
+    int p=1000;
     for (int i = 0; i < NB_PARTICLES; i++)
     {
-        xxx = rand() % H;
-        yyy = rand() % H;
-        zzz = rand() % H;
-        vxx = (rand() % (2 * EXCITATION));
-        vyy = (rand() % (2 * EXCITATION));
-        vzz = (rand() % (2 * EXCITATION));
-
-        vxx -= EXCITATION;
-        vyy -= EXCITATION;
-        vzz -= EXCITATION;
-
-        printf("----  %i   %i   %i\n", xxx, yyy, zzz);
-        printf(" %i    %i\n", i, coords_to_int());
-
-        particles[i] = coords_to_int();
-        velocity[i] = velocity_to_int();
-        printf("\n");
+        int xx = rand() % H ;
+        int yy = rand() % H ;
+        int zz = rand() % H ;
+        int vx = (rand() % p);
+        int vy = (rand() % p);
+        int vz = (rand() % p);
+        // grid->c[xx][yy][zz]=i;
+        grille[xx][yy][zz]=i;
+        grid->x[i]=xx;
+        grid->y[i]=yy;
+        grid->z[i]=zz;
+        grid->vx[i]=(float)vx/(float)p-0.5;
+        grid->vy[i]=(float)vy/(float)p-0.5;
+        grid->vz[i]=(float)vz/(float)p-0.5;
+        // printf("%i: x=%i   y=%i   z=%i\n",grid->c[xx][yy][zz],xx,yy,zz);
+        // printf("%i: vx=%4.3f   vy=%f   vz=%f\n",grid->c[xx][yy][zz],grid->vx[i],grid->vy[i],grid->vz[i]);
     }
 }
-
-// void bounce(void)
-// {
-
-//     for (int i=0; i<NB_PARTICLES;i++)
-//     {
-//         int x = grid->x[i];
-//         int y = grid->y[i];
-//         int z = grid->z[i];
-//         // grid->c[(int)x][(int)y][(int)z]=-1;
-//         int vx = grid->vx[i];
-//         int vy = grid->vy[i];
-//         int vz = grid->vz[i];
-//         x+=vx;
-//         y+=vy;
-//         z+=vz;
-//         grid->x[i] = x;
-//         grid->y[i] = y;
-//         grid->z[i] = z;
-//         if (x <= SIZE_PARTICLES)
-//         {
-//             grid->x[i] = SIZE_PARTICLES;
-//             grid->vx[i] *= -WALL;
-//         }
-//         else if (x >= H - SIZE_PARTICLES)
-//         {
-//             grid->x[i] = H - SIZE_PARTICLES;
-//             grid->vx[i] *= -WALL;
-//         }
-//         if (y <= SIZE_PARTICLES)
-//         {
-//             grid->y[i] = SIZE_PARTICLES;
-//             grid->vy[i] *= -WALL; // bounces
-//         }
-//         else if (y >= H - SIZE_PARTICLES)
-//         {
-//             grid->y[i] = H - SIZE_PARTICLES;
-//             grid->vy[i] *= -WALL;
-//         }
-//         if (z <= SIZE_PARTICLES)
-//         {
-//             grid->z[i] = SIZE_PARTICLES;
-//             grid->vz[i] *= -WALL;
-//         }
-//         else if (z >= H - SIZE_PARTICLES)
-//         {
-//             grid->z[i] = H - SIZE_PARTICLES;
-//             grid->vz[i] *= -WALL;
-//         }
-
-//         // grid->c[(int)x][(int)y][(int)z]=i;
-//     }
-//     glutPostRedisplay();
-
-//     return;
-
-// }
 
 void init(void)
 {
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glShadeModel(GL_FLAT);
+}
+
+void bounce(void)
+{
+
+    for (int i=0; i<NB_PARTICLES;i++)
+    {
+        float x = grid->x[i];
+        float y = grid->y[i];
+        float z = grid->z[i];
+        // grid->c[(int)x][(int)y][(int)z]=-1;
+        float vx = grid->vx[i];
+        float vy = grid->vy[i];
+        float vz = grid->vz[i];
+        x+=vx;
+        y+=vy;
+        z+=vz;
+        grid->x[i] = x;
+        grid->y[i] = y;
+        grid->z[i] = z;
+        if (x <= SIZE_PARTICLES)
+        {
+            grid->x[i] = SIZE_PARTICLES;
+            grid->vx[i] *= -WALL;
+        }
+        else if (x >= H - SIZE_PARTICLES)
+        {
+            grid->x[i] = H - SIZE_PARTICLES;
+            grid->vx[i] *= -WALL;
+        }
+        if (y <= SIZE_PARTICLES)
+        {
+            grid->y[i] = SIZE_PARTICLES;
+            grid->vy[i] *= -WALL; // bounces
+        }
+        else if (y >= H - SIZE_PARTICLES)
+        {
+            grid->y[i] = H - SIZE_PARTICLES;
+            grid->vy[i] *= -WALL;
+        }
+        if (z <= SIZE_PARTICLES)
+        {
+            grid->z[i] = SIZE_PARTICLES;
+            grid->vz[i] *= -WALL;
+        }
+        else if (z >= H - SIZE_PARTICLES)
+        {
+            grid->z[i] = H - SIZE_PARTICLES;
+            grid->vz[i] *= -WALL;
+        }     
+            
+        // grid->c[(int)x][(int)y][(int)z]=i;
+    }
+    glutPostRedisplay(); 
+
+    return;
+
 }
 
 void stopRotation(void)
@@ -248,25 +224,26 @@ void display(void)
 
         for (int i = 0; i < NB_PARTICLES; i++)
         {
-            int_to_coords(particles[i]);
+            float x = grid->x[i] * 2 * AREA / H - AREA;
+            float y = grid->y[i] * 2 * AREA / H - AREA;
+            float z = grid->z[i] * 2 * AREA / H - AREA;
             glPushMatrix();
-            if (i == 0)
+            if (i==0)
             {
                 glColor3f(0, 0, 1);
-                glTranslatef(xxx, yyy, zzz);
+                glTranslatef(x, y, z);
                 glutWireSphere(SIZE_PARTICLES, 40, 30);
-                printf("----  %i   %i   %i\n", xxx, yyy, zzz);
             }
             else if (i % 2 == 0)
             {
                 glColor3f(0.7, 0.5, 0.1);
-                glTranslatef(xxx, yyy, zzz);
+                glTranslatef(x, y, z);
                 glutWireSphere(SIZE_PARTICLES, 40, 30);
             }
             else
             {
                 glColor3f(0.1, 0.9, 0.5);
-                glTranslatef(xxx, yyy, zzz);
+                glTranslatef(x, y, z);
                 glutWireSphere(SIZE_PARTICLES, 40, 30);
             }
             glPopMatrix();
@@ -274,7 +251,7 @@ void display(void)
         glColor3f(0, 0, 1);
         glTranslatef(-AREA * 1.45, 0, AREA);
         glRotatef(90, 1.0, 0.0, 0.0);
-        glutWireSphere(300, 20, 20);
+        glutWireSphere(10, 20, 20);
         glFlush();
     }
     glPopMatrix();
@@ -406,7 +383,7 @@ int main(int argc, char **argv)
     {
         start = 0;
         intit_particles();
-        pointOfView = 3 * H;
+        pointOfView = H;
     }
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
@@ -420,7 +397,7 @@ int main(int argc, char **argv)
     glutMouseFunc(mouse);
     glutMotionFunc(mousemotion);
     // glutTimerFunc(1,attraction,1);
-    // glutIdleFunc(bounce);
+    glutIdleFunc(bounce);
     glutMainLoop();
     return 0;
 }

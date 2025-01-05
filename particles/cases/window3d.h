@@ -8,19 +8,19 @@
 #include <pthread.h>
 
 #define NB_THREAD 3
-#define NB_PARTICLES 200
-#define SIZE_PARTICLES 1
-#define W 120
-#define H 100
+#define NB_PARTICLES 5
+#define SIZE_PARTICLES 10
+#define W 1200
+#define H 1000
 #define WINDOW_W 1600
 #define WINDOW_H 900
-#define AREA H / 3 
+#define AREA H 
 #define G 9.81
 #define PI 3.14159
-#define UPDATE_TIME 0.01
+#define UPDATE_TIME 1
 #define WALL 1    // 0.95   // rebonds
 #define FLOOR 1    // 0.8   // rebonds
-#define EXCITATION 1 // vitesse max
+#define EXCITATION 5 // vitesse max et doit être plus petit que 100
 
 
 // H et W définit pour affichage sur la totalité de l'écran l'écran avec:
@@ -30,13 +30,13 @@
 
 struct Grid
 {
-  int c[H][H][H];
-  float x[H];
-  float y[H];
-  float z[H];
-  float vx[H];
-  float vy[H];
-  float vz[H];
+  // int c[H][H][H];
+  int x[H];
+  int y[H];
+  int z[H];
+  int vx[H];
+  int vy[H];
+  int vz[H];
 };
 
 typedef struct inputThread
@@ -50,7 +50,6 @@ void intit_particles(void);
 void init(void);
 void bounce(void);
 void gravity(void);
-float checkAttraction(float a, float b);
 void attraction(void);
 void stopRotationX(void);
 void stopRotationY(void);
