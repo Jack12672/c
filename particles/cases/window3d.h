@@ -7,8 +7,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define NB_THREAD 3
-#define NB_PARTICLES 500
+#define NB_THREAD 2
+#define NB_PARTICLES 5
 #define SIZE_PARTICLES 10
 #define W 1200
 #define H 1000
@@ -31,10 +31,11 @@ typedef struct inputThread
 {
     int a;
     int b;
+    int c;
     int thread;
 } inputThread_t;
 
-void intit_particles(void);
+void intit_particles(int th);
 
 void init(void);
 void bounce(void);
