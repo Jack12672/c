@@ -97,12 +97,11 @@ void intit_particles(int th)
 
         particles[th][i] = coords_to_int(th);
         velocity[th][i] = velocity_to_int(th);
-        xxx[th] = -27;
         int_to_coords(th, particles[th][i]);
 
-        printf(" %i    %i\n", i, particles[th][i]);
-        printf("----  %i   %i   %i\n", xxx[th], yyy[th], zzz[th]);
-        printf("\n");
+        // printf(" %i    %i\n", i, particles[th][i]);
+        // printf("----  %i   %i   %i\n", xxx[th], yyy[th], zzz[th]);
+        // printf("\n");
     }
 }
 
@@ -174,41 +173,6 @@ void zoom(void)
     glRotated(totalRotationX, 0, 1, 0);
 }
 
-void *display_th(void *arguments)
-{
-    inputThread_t *arg = (inputThread_t *) arguments;
-
-    for (int i = 0; i < NB_PARTICLES; i++)
-    {
-        int_to_coords(arg->thread,particles[arg->thread][i]);
-        glPushMatrix();
-        if (i == 0)
-        {
-            glColor3f(0, 0, 1);
-            glTranslatef(xxx[arg->thread], yyy[arg->thread], zzz[arg->thread]);
-            glutWireSphere(SIZE_PARTICLES, 40, 30);
-            // printf("----  %i   %i   %i\n", xxx, yyy, zzz);
-        }
-        else if (i % 2 == 0)
-        {
-            glColor3f(0.7, 0.5, 0.1);
-            glTranslatef(xxx[arg->thread], yyy[arg->thread], zzz[arg->thread]);
-            glutWireSphere(SIZE_PARTICLES, 40, 30);
-        }
-        else
-        {
-            glColor3f(0.1, 0.9, 0.5);
-            glTranslatef(xxx[arg->thread], yyy[arg->thread], zzz[arg->thread]);
-            glutWireSphere(SIZE_PARTICLES, 40, 30);
-        }
-        glPopMatrix();
-    }
-    inputThread_t *rep;
-    rep->thread=arg->thread;
-    rep->a=5;
-    return (void *) rep;
-}
-
 void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -220,36 +184,73 @@ void display(void)
     glRotated(cameraAngleY, 1, 0, 0);
     glPushMatrix();
     {
-        glColor3f(1, 1, 1);
-        char str[130];
-        char str1[30];
-        char str2[30];
-        char str3[30];
-        char str4[30];
+        // write_info();
+        display_PARTICLES();
+        display_AREA();
+        display_SPHERE();
 
-        sprintf(str, "%s", txt1);
-        strcat(str, ": ");
-        sprintf(str1, "%f", temp1);
-        strcat(str, str1);
-        strcat(str, " | ");
-        strcat(str, txt2);
-        strcat(str, ": ");
-        sprintf(str2, "%f", temp2);
-        strcat(str, str2);
-        strcat(str, " | ");
-        strcat(str, txt3);
-        strcat(str, ": ");
-        sprintf(str3, "%f", temp3);
-        strcat(str, str3);
-        strcat(str, " | ");
-        strcat(str, txt4);
-        strcat(str, ": ");
-        sprintf(str4, "%f", temp4);
-        strcat(str, str4);
+        glFlush();
+    }
+    glPopMatrix();
+    glutSwapBuffers();
+}
 
-        write(-W / 3, H / 2, str, GLUT_BITMAP_9_BY_15);
+void reshape(int w, int h)
+{
+    glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 0.0, AREA);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    gluLookAt(0.0, 0.0, pointOfView, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+}
 
-        glBegin(GL_LINE_STRIP);
+void display_PARTICLES (void)
+{
+    for (int i = 0; i < NB_PARTICLES; i++)
+    {
+        // for (int t=0; t<NB_THREAD; t++)
+            
+
+        glPushMatrix();
+        for (int t=0; t<NB_THREAD; t++)
+        {int_to_coords(t,particles[t][i]);
+            if (i == 0)
+            {
+                glColor3f(0, 0, 1);
+                glTranslatef(xxx[t], yyy[t], zzz[t]);
+                glutWireSphere(SIZE_PARTICLES, 40, 30);
+                printf("%i   x=%i\n",t,xxx[t]);
+            }
+            else if (i % 2 == 0)
+            {
+                glColor3f(0.7, 0.5, 0.1);
+                glTranslatef(xxx[t], yyy[t], zzz[t]);
+                glutWireSphere(SIZE_PARTICLES, 40, 30);
+            }
+            else
+            {
+                glColor3f(0.1, 0.9, 0.5);
+                glTranslatef(xxx[t], yyy[t], zzz[t]);
+                glutWireSphere(SIZE_PARTICLES, 40, 30);
+            }
+        }
+        glPopMatrix();
+    }
+}
+
+void display_SPHERE (void)
+{
+    glColor3f(0, 0, 1);
+    glTranslatef(-AREA * 1.45, 0, AREA);
+    glRotatef(90, 1.0, 0.0, 0.0);
+    glutWireSphere(300, 20, 20);
+}
+
+void display_AREA (void)
+{
+    glBegin(GL_LINE_STRIP);
         glColor4f(1, 0.0, 0.0, 1);
         glVertex3f(-AREA, -AREA, AREA);
         glVertex3f(AREA, -AREA, AREA);
@@ -274,69 +275,6 @@ void display(void)
         glVertex3f(-AREA, -AREA, -AREA);
         glVertex3f(-AREA, AREA, -AREA);
         glEnd();
-
-        // pthread_t yo[NB_THREAD];
-        // for (int i=0; i<NB_THREAD; i++)
-        // {
-        //     thread[i].thread=i;
-        //     pthread_create(&yo[i], NULL, display_th, &thread[i]);
-        // }
-        // inputThread_t *rep[NB_THREAD];
-        // for (int i=0; i<NB_THREAD; i++)
-        // {
-        //     pthread_join(yo[i], (void *) &rep[i]);
-        //     free (rep[i]);
-        // }
-
-        // for (int i = 0; i < NB_PARTICLES; i++)
-        // {
-        //     int_to_coords(particles[i]);
-        //     glPushMatrix();
-        //     if (i == 0)
-        //     {
-        //         glColor3f(0, 0, 1);
-        //         glTranslatef(xxx, yyy, zzz);
-        //         glutWireSphere(SIZE_PARTICLES, 40, 30);
-        //         // printf("----  %i   %i   %i\n", xxx, yyy, zzz);
-        //     }
-        //     else if (i % 2 == 0)
-        //     {
-        //         glColor3f(0.7, 0.5, 0.1);
-        //         glTranslatef(xxx, yyy, zzz);
-        //         glutWireSphere(SIZE_PARTICLES, 40, 30);
-        //     }
-        //     else
-        //     {
-        //         glColor3f(0.1, 0.9, 0.5);
-        //         glTranslatef(xxx, yyy, zzz);
-        //         glutWireSphere(SIZE_PARTICLES, 40, 30);
-        //     }
-        //     glPopMatrix();
-        // }
-
-
-
-
-
-        glColor3f(0, 0, 1);
-        glTranslatef(-AREA * 1.45, 0, AREA);
-        glRotatef(90, 1.0, 0.0, 0.0);
-        glutWireSphere(300, 20, 20);
-        glFlush();
-    }
-    glPopMatrix();
-    glutSwapBuffers();
-}
-
-void reshape(int w, int h)
-{
-    glViewport(0, 0, (GLsizei)w, (GLsizei)h);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 0.0, AREA);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(0.0, 0.0, pointOfView, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
 void write(int x, int y, char *string, void *font)
@@ -345,6 +283,36 @@ void write(int x, int y, char *string, void *font)
     int len = (int)strlen(string);
     for (int i = 0; i < len; i++)
         glutBitmapCharacter(font, string[i]);
+}
+
+void write_info(void)
+{
+    glColor3f(1, 1, 1);
+    char str[130];
+    char str1[30];
+    char str2[30];
+    char str3[30];
+    char str4[30];
+    sprintf(str, "%s", txt1);
+    strcat(str, ": ");
+    sprintf(str1, "%f", temp1);
+    strcat(str, str1);
+    strcat(str, " | ");
+    strcat(str, txt2);
+    strcat(str, ": ");
+    sprintf(str2, "%f", temp2);
+    strcat(str, str2);
+    strcat(str, " | ");
+    strcat(str, txt3);
+    strcat(str, ": ");
+    sprintf(str3, "%f", temp3);
+    strcat(str, str3);
+    strcat(str, " | ");
+    strcat(str, txt4);
+    strcat(str, ": ");
+    sprintf(str4, "%f", temp4);
+    strcat(str, str4);
+    write(-W / 3, H / 2, str, GLUT_BITMAP_9_BY_15);
 }
 
 void keyboard(unsigned char key, int x, int y)
@@ -452,9 +420,8 @@ int main(int argc, char **argv)
     if (start == 1)
     {
         start = 0;
-
-        intit_particles(0);
-        intit_particles(1);
+        for (int i=0; i<NB_THREAD;i++)
+            intit_particles(i);
         pointOfView = AREA * 3;
         
     }
@@ -473,3 +440,49 @@ int main(int argc, char **argv)
     glutMainLoop();
     return 0;
 }
+
+
+//    pthread_t thr0;
+//     // pthread_t thr1;
+
+//     int thr0_number=0;
+//     // int thr1_number=1;
+    
+//     pthread_create(&thr0,NULL,display_th, &thr0_number);
+
+
+//     void *return_value1;
+//     pthread_join(thr0,(void *) &return_value1);
+
+    
+
+//     free (return_value1);
+
+
+        // pthread_t yo[NB_THREAD];
+        // for (int i=0; i<NB_THREAD; i++)
+        // {
+        //     thread[i].thread=i;
+        //     pthread_create(&yo[i], NULL, display_th, &thread[i]);
+        // }
+        // inputThread_t *rep[NB_THREAD];
+        // for (int i=0; i<NB_THREAD; i++)
+        // {
+        //     pthread_join(yo[i], (void *) &rep[i]);
+        //     free (rep[i]);
+        // }
+
+// void *display_th(void *arguments)
+// {
+//     int *arg = (int *) arguments;
+
+//     if (*arg==0) 
+//     {
+//         printf("-==000000==--  %i  ----\n",*arg);
+
+        
+//     }
+//     else printf("---  %i  ----\n",*arg);
+   
+//     return (void *) NULL;
+// }

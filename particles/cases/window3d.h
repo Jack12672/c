@@ -25,13 +25,13 @@
 // H et W définit pour affichage sur la totalité de l'écran l'écran avec:
 // gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 0.0, 20.0);
 // gluLookAt(0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-// soit x+/-100 et y+/-100
+
 
 typedef struct inputThread
 {
-    int a;
-    int b;
-    int c;
+    // int a;
+    // int b;
+    // int c;
     int thread;
 } inputThread_t;
 
@@ -43,6 +43,10 @@ void stopRotationX(void);
 void stopRotationY(void);
 void display(void);
 void reshape(int w, int h);
+void display_SPHERE (void); 
+void display_AREA (void);
+void display_PARTICLES (void);
+void write_info(void);
 void write(int x, int y, char *string, void *font);
 void keyboard(unsigned char key, int x, int y);
 void mouse(int bouton, int etat, int x, int y);
