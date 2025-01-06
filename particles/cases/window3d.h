@@ -7,8 +7,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define NB_THREAD 2
-#define NB_PARTICLES 5
+#define NB_THREAD 4
+#define NB_PARTICLES 500
 #define SIZE_PARTICLES 10
 #define W 1200
 #define H 1000

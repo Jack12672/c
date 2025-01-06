@@ -76,7 +76,7 @@ void int_to_velocity(int th, int val)
 
 void intit_particles(int th)
 {
-    srand(time(NULL));
+    srand(time(NULL)+th*10);
     for (int i = 0; i < NB_PARTICLES; i++)
     {
         xxx[th] = (rand() % H);
@@ -210,12 +210,13 @@ void display_PARTICLES (void)
 {
     for (int i = 0; i < NB_PARTICLES; i++)
     {
-        // for (int t=0; t<NB_THREAD; t++)
-            
-
-        glPushMatrix();
         for (int t=0; t<NB_THREAD; t++)
-        {int_to_coords(t,particles[t][i]);
+            int_to_coords(t,particles[t][i]);
+
+        
+        for (int t=0; t<NB_THREAD; t++)
+        {
+            glPushMatrix();
             if (i == 0)
             {
                 glColor3f(0, 0, 1);
@@ -235,8 +236,9 @@ void display_PARTICLES (void)
                 glTranslatef(xxx[t], yyy[t], zzz[t]);
                 glutWireSphere(SIZE_PARTICLES, 40, 30);
             }
+            glPopMatrix();
         }
-        glPopMatrix();
+        
     }
 }
 
