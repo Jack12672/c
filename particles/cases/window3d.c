@@ -22,7 +22,8 @@ static float cameraAngleY = 0;
 static float totalRotationX = 0;
 static float totalRotationY = 0;
 static float pointOfView = 0;
-
+static float temp_time_max = 0;
+static float temp_time_min = 100000;
 static float temp1 = 0;
 static float temp2 = 0;
 static float temp3 = 0;
@@ -42,11 +43,8 @@ static int vzz[NB_THREAD];
 static int particles[NB_THREAD][NB_PARTICLES];
 static int velocity[NB_THREAD][NB_PARTICLES];
 
-static inputThread_t thread[NB_THREAD];
-
 // static float Forces[12] = { 4,     0.33,  0.01,  -0.96, -0.73, -0.45,
 //                             -0.27, -0.13, -0.06, -0.02, -0.01, 0 };
-
 
 int coords_to_int(int th)
 {
@@ -76,7 +74,7 @@ void int_to_velocity(int th, int val)
 
 void intit_particles(int th)
 {
-    srand(time(NULL)+th*10);
+    srand(time(NULL) + th * 10);
     for (int i = 0; i < NB_PARTICLES; i++)
     {
         xxx[th] = (rand() % H);
@@ -93,7 +91,8 @@ void intit_particles(int th)
         vyy[th] -= EXCITATION;
         vzz[th] -= EXCITATION;
 
-        printf("--thread %i--  %i   %i   %i\n", th, xxx[th], yyy[th], zzz[th]);
+        // printf("--thread %i--  %i   %i   %i\n", th, xxx[th], yyy[th],
+        // zzz[th]);
 
         particles[th][i] = coords_to_int(th);
         velocity[th][i] = velocity_to_int(th);
@@ -206,15 +205,14 @@ void reshape(int w, int h)
     gluLookAt(0.0, 0.0, pointOfView, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
-void display_PARTICLES (void)
+void display_PARTICLES(void)
 {
     for (int i = 0; i < NB_PARTICLES; i++)
     {
-        for (int t=0; t<NB_THREAD; t++)
-            int_to_coords(t,particles[t][i]);
+        for (int t = 0; t < NB_THREAD; t++)
+            int_to_coords(t, particles[t][i]);
 
-        
-        for (int t=0; t<NB_THREAD; t++)
+        for (int t = 0; t < NB_THREAD; t++)
         {
             glPushMatrix();
             if (i == 0)
@@ -222,7 +220,7 @@ void display_PARTICLES (void)
                 glColor3f(0, 0, 1);
                 glTranslatef(xxx[t], yyy[t], zzz[t]);
                 glutWireSphere(SIZE_PARTICLES, 40, 30);
-                printf("%i   x=%i\n",t,xxx[t]);
+                // printf("%i   x=%i\n",t,xxx[t]);
             }
             else if (i % 2 == 0)
             {
@@ -238,11 +236,10 @@ void display_PARTICLES (void)
             }
             glPopMatrix();
         }
-        
     }
 }
 
-void display_SPHERE (void)
+void display_SPHERE(void)
 {
     glColor3f(0, 0, 1);
     glTranslatef(-AREA * 1.45, 0, AREA);
@@ -250,33 +247,33 @@ void display_SPHERE (void)
     glutWireSphere(300, 20, 20);
 }
 
-void display_AREA (void)
+void display_AREA(void)
 {
     glBegin(GL_LINE_STRIP);
-        glColor4f(1, 0.0, 0.0, 1);
-        glVertex3f(-AREA, -AREA, AREA);
-        glVertex3f(AREA, -AREA, AREA);
-        glVertex3f(AREA, -AREA, -AREA);
-        glVertex3f(-AREA, -AREA, -AREA);
-        glVertex3f(-AREA, -AREA, AREA);
-        glVertex3f(-AREA, AREA, AREA);
-        glVertex3f(AREA, AREA, AREA);
-        glVertex3f(AREA, AREA, -AREA);
-        glVertex3f(-AREA, AREA, -AREA);
-        glVertex3f(-AREA, AREA, AREA);
-        glEnd();
-        glBegin(GL_LINES);
-        glVertex3f(AREA, -AREA, AREA);
-        glVertex3f(AREA, AREA, AREA);
-        glEnd();
-        glBegin(GL_LINES);
-        glVertex3f(AREA, -AREA, -AREA);
-        glVertex3f(AREA, AREA, -AREA);
-        glEnd();
-        glBegin(GL_LINES);
-        glVertex3f(-AREA, -AREA, -AREA);
-        glVertex3f(-AREA, AREA, -AREA);
-        glEnd();
+    glColor4f(1, 0.0, 0.0, 1);
+    glVertex3f(-AREA, -AREA, AREA);
+    glVertex3f(AREA, -AREA, AREA);
+    glVertex3f(AREA, -AREA, -AREA);
+    glVertex3f(-AREA, -AREA, -AREA);
+    glVertex3f(-AREA, -AREA, AREA);
+    glVertex3f(-AREA, AREA, AREA);
+    glVertex3f(AREA, AREA, AREA);
+    glVertex3f(AREA, AREA, -AREA);
+    glVertex3f(-AREA, AREA, -AREA);
+    glVertex3f(-AREA, AREA, AREA);
+    glEnd();
+    glBegin(GL_LINES);
+    glVertex3f(AREA, -AREA, AREA);
+    glVertex3f(AREA, AREA, AREA);
+    glEnd();
+    glBegin(GL_LINES);
+    glVertex3f(AREA, -AREA, -AREA);
+    glVertex3f(AREA, AREA, -AREA);
+    glEnd();
+    glBegin(GL_LINES);
+    glVertex3f(-AREA, -AREA, -AREA);
+    glVertex3f(-AREA, AREA, -AREA);
+    glEnd();
 }
 
 void write(int x, int y, char *string, void *font)
@@ -418,14 +415,13 @@ void mousemotion(int x, int y)
 }
 
 int main(int argc, char **argv)
-{   
+{
     if (start == 1)
     {
         start = 0;
-        for (int i=0; i<NB_THREAD;i++)
+        for (int i = 0; i < NB_THREAD; i++)
             intit_particles(i);
         pointOfView = AREA * 3;
-        
     }
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
@@ -438,53 +434,182 @@ int main(int argc, char **argv)
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
     glutMotionFunc(mousemotion);
-    // glutIdleFunc(bounce);
+    glutIdleFunc(bounce);
     glutMainLoop();
     return 0;
 }
 
+void bounce(void)
+{
+    float t0 = clock();
+
+    pthread_t thr[NB_THREAD];
+    int thr_number[NB_THREAD];
+    for (int i = 0; i < NB_THREAD; i++)
+    {
+        thr_number[i] = i;
+        pthread_create(&thr[i], NULL, bounce3, &thr_number[i]);
+    }
+
+    void *return_value;
+    for (int i = 0; i < NB_THREAD; i++)
+        pthread_join(thr[i], (void *)&return_value);
+
+    free(return_value);
+
+    float t1 = (clock() - t0) / CLOCKS_PER_SEC;
+    if (t1 < temp_time_min)
+    {
+        temp_time_min = t1;
+        printf("==> time min = %f\n", temp_time_min);
+        printf("    time max = %f\n\n", temp_time_max);
+    }
+
+    if (t1 > temp_time_max)
+    {
+        temp_time_max = t1;
+        printf("    time min = %f\n", temp_time_min);
+        printf("==> time max = %f\n\n", temp_time_max);
+    }
+}
+
+void *bounce3(void *arguments)
+{
+    int *arg = (int *)arguments;
+    for (int i = 0; i < NB_PARTICLES; i++)
+    {
+        int_to_coords(*arg, particles[*arg][i]);
+        int_to_velocity(*arg, velocity[*arg][i]);
+
+        xxx[*arg] += vxx[*arg];
+        yyy[*arg] += vyy[*arg];
+        zzz[*arg] += vzz[*arg];
+        if (xxx[*arg] <= -AREA)
+        {
+            xxx[*arg] = -AREA;
+            vxx[*arg] *= -WALL;
+        }
+        else if (xxx[*arg] >= AREA - SIZE_PARTICLES)
+        {
+            xxx[*arg] = AREA - SIZE_PARTICLES;
+            vxx[*arg] *= -WALL;
+        }
+        if (yyy[*arg] <= -AREA)
+        {
+            yyy[*arg] = -AREA;
+            vyy[*arg] *= -WALL;
+        }
+        else if (yyy[*arg] >= AREA - SIZE_PARTICLES)
+        {
+            yyy[*arg] = AREA - SIZE_PARTICLES;
+            vyy[*arg] *= -WALL;
+        }
+        if (zzz[*arg] <= -AREA)
+        {
+            zzz[*arg] = -AREA;
+            vzz[*arg] *= -WALL;
+        }
+        else if (zzz[*arg] >= AREA - SIZE_PARTICLES)
+        {
+            zzz[*arg] = AREA - SIZE_PARTICLES;
+            vzz[*arg] *= -WALL;
+        }
+        particles[*arg][i] = coords_to_int(*arg);
+        velocity[*arg][i] = velocity_to_int(*arg);
+    }
+    glutPostRedisplay();
+    return (void *)NULL;
+}
+
+// void bounce1(void)
+// {
+//     for (int i = 0; i < NB_PARTICLES; i++)
+//     {
+//         for (int t=0; t<NB_THREAD; t++)
+//         {
+//             int_to_coords(t,particles[t][i]);
+//             int_to_velocity(t,velocity[t][i]);
+
+//             xxx[t] += vxx[t];
+//             yyy[t] += vyy[t];
+//             zzz[t] += vzz[t];
+//             if (xxx[t] <= -AREA)
+//             {
+//                 xxx[t] = -AREA;
+//                 vxx[t] *= -WALL;
+//             }
+//             else if (xxx[t] >= AREA - SIZE_PARTICLES)
+//             {
+//                 xxx[t] = AREA - SIZE_PARTICLES;
+//                 vxx[t] *= -WALL;
+//             }
+//             if (yyy[t] <= -AREA)
+//             {
+//                 yyy[t] = -AREA;
+//                 vyy[t] *= -WALL;
+//             }
+//             else if (yyy[t] >= AREA - SIZE_PARTICLES)
+//             {
+//                 yyy[t] = AREA - SIZE_PARTICLES;
+//                 vyy[t] *= -WALL;
+//             }
+//             if (zzz[t] <= -AREA)
+//             {
+//                 zzz[t] = -AREA;
+//                 vzz[t] *= -WALL;
+//             }
+//             else if (zzz[t] >= AREA - SIZE_PARTICLES)
+//             {
+//                 zzz[t] = AREA - SIZE_PARTICLES;
+//                 vzz[t] *= -WALL;
+//             }
+//             particles[t][i] = coords_to_int(t);
+//             velocity[t][i] = velocity_to_int(t);
+//         }
+//     }
+//     glutPostRedisplay();
+// }
 
 //    pthread_t thr0;
 //     // pthread_t thr1;
 
 //     int thr0_number=0;
 //     // int thr1_number=1;
-    
-//     pthread_create(&thr0,NULL,display_th, &thr0_number);
 
+//     pthread_create(&thr0,NULL,display_th, &thr0_number);
 
 //     void *return_value1;
 //     pthread_join(thr0,(void *) &return_value1);
 
-    
-
 //     free (return_value1);
 
-
-        // pthread_t yo[NB_THREAD];
-        // for (int i=0; i<NB_THREAD; i++)
-        // {
-        //     thread[i].thread=i;
-        //     pthread_create(&yo[i], NULL, display_th, &thread[i]);
-        // }
-        // inputThread_t *rep[NB_THREAD];
-        // for (int i=0; i<NB_THREAD; i++)
-        // {
-        //     pthread_join(yo[i], (void *) &rep[i]);
-        //     free (rep[i]);
-        // }
+// pthread_t yo[NB_THREAD];
+// for (int i=0; i<NB_THREAD; i++)
+// {
+//     thread[i].thread=i;
+//     pthread_create(&yo[i], NULL, display_th, &thread[i]);
+// }
+// inputThread_t *rep[NB_THREAD];
+// for (int i=0; i<NB_THREAD; i++)
+// {
+//     pthread_join(yo[i], (void *) &rep[i]);
+//     free (rep[i]);
+// }
 
 // void *display_th(void *arguments)
 // {
 //     int *arg = (int *) arguments;
 
-//     if (*arg==0) 
+//     if (*arg==0)
 //     {
 //         printf("-==000000==--  %i  ----\n",*arg);
 
-        
 //     }
 //     else printf("---  %i  ----\n",*arg);
-   
+
 //     return (void *) NULL;
 // }
+
+// float t0=clock();
+// float t1=clock()-t0;
+// printf("time = %f\n",t1/CLOCKS_PER_SEC);
