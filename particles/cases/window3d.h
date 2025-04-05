@@ -24,7 +24,7 @@
 //     time max = 0.000500
 
 #define NB_THREAD 1
-#define NB_PARTICLES 8000
+#define NB_PARTICLES 800
 #define SIZE_PARTICLES 10
 #define W 1200
 #define H 1000
